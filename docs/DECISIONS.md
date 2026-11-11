@@ -48,6 +48,17 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
 - **MACROPHAGE, SINALIZAÇÃO POR CITOCINAS:** representa as citocinas inflamatórias que ativam as células de defesa próximas. É um aumento de dano nos aliados em volta.
 - **Regra:** os efeitos não acumulam. Usar de novo só renova a duração, e as habilidades não afetam inimigos.
 
+### D009: Regras da MISSÃO 001 (2026-11-11, provisória)
+- **Foco controlado:** todos os invasores que nasceram no foco foram eliminados e há uma unidade do jogador dentro da área. Uma vez controlado, o foco não volta a ficar ativo.
+- **Dano tecidual:** cada invasor vivo soma uma taxa por segundo (comum 0,2%/s, encapsulada 0,35%/s). Chegar a 100% é derrota, e passar de 50% falha o objetivo secundário. Representa o limite de dano tecidual do GDD.
+- **Derrota também** quando todas as unidades do jogador caem.
+- **Motivo:** o GDD pede "controlar todos os focos" e "ultrapassar o limite de dano tecidual". A taxa por invasor cria pressão de tempo sem precisar ainda da reprodução bacteriana.
+
+### D010: Cápsula como mecanismo, e não como vida extra (2026-11-11, provisória)
+- **Decisão:** a bactéria encapsulada bloqueia 60% do dano de atacantes comuns. Atacantes ativados pela SINALIZAÇÃO POR CITOCINAS ignoram a cápsula.
+- **Motivo:** o GDD exige que a resistência seja um mecanismo biológico, e não só mais vida. A cápsula polissacarídica dificulta a fagocitose, e fagócitos ativados por citocinas são mais eficazes contra ela. Isso também dá um uso tático para a habilidade do Macrophage.
+- **Simplificação:** na biologia real, a principal resposta à cápsula é a opsonização (anticorpos e complemento), que entra quando existirem as unidades adaptativas (B CELL).
+
 ## Em aberto
 
 - **Recurso do jogador:** o GDD fala em "recursos iniciais" sem definir o que são. Ideia em avaliação: sinais inflamatórios para chamar reforços.

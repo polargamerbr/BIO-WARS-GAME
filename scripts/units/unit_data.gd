@@ -19,6 +19,13 @@ enum BodyShape { UPRIGHT, ROD }  ## UPRIGHT: soldado em pé. ROD: bastonete deit
 @export var attack_range: float = 1.5  ## Metros entre as bordas dos dois corpos.
 @export var detection_range: float = 8.0  ## Metros. Até onde a unidade parada percebe inimigos.
 
+@export_group("Biologia")
+## Fração do dano bloqueada por uma cápsula (0 = sem cápsula). A cápsula dificulta a fagocitose;
+## atacantes ativados (efeito de dano, como o das citocinas) ignoram a proteção.
+@export_range(0.0, 1.0) var capsule_protection: float = 0.0
+## Pontos percentuais de dano tecidual por segundo enquanto o invasor está vivo.
+@export var tissue_damage_rate: float = 0.0
+
 @export_group("Habilidades")
 @export var abilities: Array[AbilityData] = []
 

@@ -1,0 +1,92 @@
+[gd_resource type="Resource" script_class="MissionData" load_steps=20 format=3]
+
+[ext_resource type="Script" path="res://scripts/missions/mission_data.gd" id="1_mission"]
+[ext_resource type="Script" path="res://scripts/missions/spawn_data.gd" id="2_spawn"]
+[ext_resource type="Script" path="res://scripts/missions/focus_data.gd" id="3_focus"]
+[ext_resource type="Resource" path="res://data/units/neutrophil.tres" id="4_neutrophil"]
+[ext_resource type="Resource" path="res://data/units/macrophage.tres" id="5_macrophage"]
+[ext_resource type="Resource" path="res://data/enemies/bacteria_common.tres" id="6_common"]
+[ext_resource type="Resource" path="res://data/enemies/bacteria_encapsulated.tres" id="7_encapsulated"]
+
+[sub_resource type="Resource" id="Spawn_p1"]
+script = ExtResource("2_spawn")
+unit = ExtResource("4_neutrophil")
+offset = Vector3(-1.6, 0, -1.6)
+
+[sub_resource type="Resource" id="Spawn_p2"]
+script = ExtResource("2_spawn")
+unit = ExtResource("4_neutrophil")
+offset = Vector3(1.6, 0, -1.6)
+
+[sub_resource type="Resource" id="Spawn_p3"]
+script = ExtResource("2_spawn")
+unit = ExtResource("4_neutrophil")
+offset = Vector3(-1.6, 0, 1.6)
+
+[sub_resource type="Resource" id="Spawn_p4"]
+script = ExtResource("2_spawn")
+unit = ExtResource("5_macrophage")
+offset = Vector3(1.6, 0, 1.6)
+
+[sub_resource type="Resource" id="Spawn_a1"]
+script = ExtResource("2_spawn")
+unit = ExtResource("7_encapsulated")
+offset = Vector3(0, 0, 0)
+
+[sub_resource type="Resource" id="Spawn_a2"]
+script = ExtResource("2_spawn")
+unit = ExtResource("6_common")
+offset = Vector3(0, 0, -3)
+
+[sub_resource type="Resource" id="Spawn_a3"]
+script = ExtResource("2_spawn")
+unit = ExtResource("6_common")
+offset = Vector3(2.8, 0, 1.4)
+
+[sub_resource type="Resource" id="Spawn_a4"]
+script = ExtResource("2_spawn")
+unit = ExtResource("6_common")
+offset = Vector3(-2.8, 0, 1.4)
+
+[sub_resource type="Resource" id="Spawn_b1"]
+script = ExtResource("2_spawn")
+unit = ExtResource("6_common")
+offset = Vector3(-1.2, 0, 0)
+
+[sub_resource type="Resource" id="Spawn_b2"]
+script = ExtResource("2_spawn")
+unit = ExtResource("6_common")
+offset = Vector3(1.2, 0, 0.8)
+
+[sub_resource type="Resource" id="Focus_alpha"]
+script = ExtResource("3_focus")
+display_name = "ALFA"
+center = Vector3(22, 0, -16)
+radius = 8.0
+enemies = Array[ExtResource("2_spawn")]([SubResource("Spawn_a1"), SubResource("Spawn_a2"), SubResource("Spawn_a3"), SubResource("Spawn_a4")])
+
+[sub_resource type="Resource" id="Focus_bravo"]
+script = ExtResource("3_focus")
+display_name = "BRAVO"
+center = Vector3(16, 0, 16)
+radius = 6.0
+enemies = Array[ExtResource("2_spawn")]([SubResource("Spawn_b1"), SubResource("Spawn_b2")])
+
+[resource]
+script = ExtResource("1_mission")
+id = &"mission_001"
+display_name = "MISSÃO 001 — PRIMEIRO CONTATO"
+campaign = "Campanha I — Primeira Linha de Defesa"
+difficulty = 1
+briefing = "Uma invasão bacteriana localizada rompeu a barreira do tecido. Há dois focos: BRAVO, com duas bactérias comuns, e ALFA, com três bactérias comuns e uma bactéria encapsulada.
+
+Enquanto os invasores estiverem vivos, o dano ao tecido aumenta. Elimine os invasores de cada foco e ocupe a área para controlá-lo.
+
+Atenção: a cápsula da bactéria encapsulada dificulta a fagocitose e bloqueia boa parte do dano. Unidades ativadas pela SINALIZAÇÃO POR CITOCINAS do MACROPHAGE (tecla E) ignoram a cápsula."
+map_id = &"test_field"
+start_zone_center = Vector3(-24, 0, 18)
+start_zone_radius = 7.0
+player_units = Array[ExtResource("2_spawn")]([SubResource("Spawn_p1"), SubResource("Spawn_p2"), SubResource("Spawn_p3"), SubResource("Spawn_p4")])
+foci = Array[ExtResource("3_focus")]([SubResource("Focus_alpha"), SubResource("Focus_bravo")])
+tissue_damage_limit = 100.0
+secondary_tissue_limit = 50.0

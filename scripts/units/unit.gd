@@ -215,7 +215,7 @@ func line_is_clear(from: Vector3, to: Vector3) -> bool:
 func take_damage(amount: float, attacker: Unit = null) -> void:
 	if state == State.DEAD:
 		return
-	var final_amount := amount * damage_taken_multiplier()
+	var final_amount := amount * damage_taken_multiplier() * _capsule_factor(attacker)
 	health = maxf(health - final_amount, 0.0)
 	damaged.emit(self, final_amount)
 	if health <= 0.0:
@@ -225,6 +225,15 @@ func take_damage(amount: float, attacker: Unit = null) -> void:
 	var can_react := state in [State.IDLE, State.DEFENDING] or (state == State.MOVING and _returning)
 	if can_react and _is_valid_target(attacker) and _within_reach(attacker):
 		_engage(attacker, false)
+
+
+## A cápsula bloqueia parte do dano. Atacante ativado (com efeito de dano) ignora a cápsula.
+func _capsule_factor(attacker: Unit) -> float:
+	if data.capsule_protection <= 0.0:
+		return 1.0
+	if attacker != null and is_instance_valid(attacker) and attacker.effect_remaining(AbilityData.Effect.DAMAGE) > 0.0:
+		return 1.0
+	return 1.0 - data.capsule_protection
 
 
 func set_selected(value: bool) -> void:

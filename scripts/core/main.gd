@@ -1,5 +1,5 @@
 extends Node3D
-## Campo de batalha de teste (Etapa A, fundação).
+## Campo de batalha de teste e montagem da partida: mapa, missão, controles e interface.
 ## O cenário é montado por código para a fundação ficar pequena e sem risco de
 ## erro em arquivo de cena. Quando o sistema de mapas existir, isto vira cena própria.
 
@@ -10,32 +10,19 @@ const CombatFxScript := preload("res://scripts/combat/combat_fx.gd")
 const HealthBarsScript := preload("res://scripts/interface/health_bars.gd")
 const CommandPanelScript := preload("res://scripts/interface/command_panel.gd")
 const FormationManagerScript := preload("res://scripts/formations/formation_manager.gd")
+const MissionControllerScript := preload("res://scripts/missions/mission_controller.gd")
+const MissionZonesScript := preload("res://scripts/interface/mission_zones.gd")
+const MissionHudScript := preload("res://scripts/interface/mission_hud.gd")
 
 const MAP_SIZE := 80.0
-const START_ZONE_CENTER := Vector3(-24.0, 0.0, 18.0)
-const INVASION_ZONE_CENTER := Vector3(22.0, 0.0, -16.0)
-
-## Inimigos iniciais, com a posição relativa ao centro da área de invasão.
-const STARTING_ENEMIES := [
-	["res://data/enemies/bacteria_common.tres", Vector3(0.0, 0.0, -3.0)],
-	["res://data/enemies/bacteria_common.tres", Vector3(2.8, 0.0, -1.0)],
-	["res://data/enemies/bacteria_common.tres", Vector3(1.8, 0.0, 2.4)],
-	["res://data/enemies/bacteria_common.tres", Vector3(-1.8, 0.0, 2.4)],
-	["res://data/enemies/bacteria_common.tres", Vector3(-2.8, 0.0, -1.0)],
-]
-
-## Unidades iniciais do teste, com a posição relativa ao centro da área inicial.
-const STARTING_UNITS := [
-	["res://data/units/neutrophil.tres", Vector3(-1.6, 0.0, -1.6)],
-	["res://data/units/neutrophil.tres", Vector3(1.6, 0.0, -1.6)],
-	["res://data/units/neutrophil.tres", Vector3(-1.6, 0.0, 1.6)],
-	["res://data/units/macrophage.tres", Vector3(1.6, 0.0, 1.6)],
-]
+## Missão carregada ao abrir. Unidades, focos e condições vêm todos deste arquivo.
+const MISSION_PATH := "res://data/missions/mission_001_first_contact.tres"
 
 var _fps_label: Label
 var _nav_region: NavigationRegion3D
 var _combat_fx: Node3D
 var _selection: SelectionController
+var _mission: MissionController
 var _obstacle_boxes: Array[AABB] = []
 
 
@@ -46,9 +33,8 @@ func _ready() -> void:
 	_build_obstacles()
 	_bake_navigation()
 	_build_grid()
-	_build_zones()
 	_build_camera()
-	_spawn_units()
+	_build_mission()
 	_build_selection()
 	_build_hud()
 
@@ -207,29 +193,6 @@ func _build_obstacles() -> void:
 		i += 1
 
 
-func _build_zones() -> void:
-	## Marcadores provisórios: área inicial (verde) e área de invasão (amarela).
-	_add_zone("StartZone", Vector3(-24.0, 0.04, 18.0), 7.0, Color(0.25, 0.75, 0.30, 0.35))
-	_add_zone("InvasionZone", Vector3(22.0, 0.04, -16.0), 9.0, Color(0.95, 0.72, 0.15, 0.35))
-
-
-func _add_zone(zone_name: String, pos: Vector3, radius: float, color: Color) -> void:
-	var mesh := CylinderMesh.new()
-	mesh.top_radius = radius
-	mesh.bottom_radius = radius
-	mesh.height = 0.04
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.albedo_color = color
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mesh.material = mat
-	var zone := MeshInstance3D.new()
-	zone.name = zone_name
-	zone.mesh = mesh
-	zone.position = pos
-	add_child(zone)
-
-
 func _build_camera() -> void:
 	var rig := CameraRigScript.new()
 	rig.name = "CameraRig"
@@ -238,22 +201,29 @@ func _build_camera() -> void:
 	add_child(rig)
 
 
-func _spawn_units() -> void:
+func _build_mission() -> void:
 	_combat_fx = CombatFxScript.new()
 	_combat_fx.name = "CombatFx"
 	add_child(_combat_fx)
-	for entry in STARTING_UNITS:
-		_spawn_unit(entry[0], START_ZONE_CENTER + (entry[1] as Vector3), Unit.Team.PLAYER)
-	for entry in STARTING_ENEMIES:
-		_spawn_unit(entry[0], INVASION_ZONE_CENTER + (entry[1] as Vector3), Unit.Team.ENEMY)
+	_mission = MissionControllerScript.new() as MissionController
+	_mission.name = "MissionController"
+	_mission.spawner = spawn_unit
+	add_child(_mission)
+	_mission.setup_mission(load(MISSION_PATH) as MissionData)
+	var zones := MissionZonesScript.new()
+	zones.name = "MissionZones"
+	add_child(zones)
+	zones.build(_mission)
 
 
-func _spawn_unit(data_path: String, pos: Vector3, team: Unit.Team) -> void:
+## Cria uma unidade no mapa. Usada pela missão (e por testes).
+func spawn_unit(unit_data: UnitData, pos: Vector3, team: Unit.Team) -> Unit:
 	var unit := UnitScript.new() as Unit
-	unit.setup(load(data_path) as UnitData, team)
+	unit.setup(unit_data, team)
 	unit.position = pos
 	add_child(unit)
 	_combat_fx.watch(unit)
+	return unit
 
 
 func _build_selection() -> void:
@@ -278,7 +248,7 @@ func _build_hud() -> void:
 	layer.add_child(panel)
 
 	var title := Label.new()
-	title.text = "BIOWAR: FRONTLINE  |  Prototype 001  |  Etapa D: estratégia"
+	title.text = "BIOWAR: FRONTLINE  |  Prototype 001  |  Etapa E: missão"
 	title.position = Vector2(16.0, 12.0)
 	layer.add_child(title)
 
@@ -290,3 +260,8 @@ func _build_hud() -> void:
 	help.text = "Esq: selecionar (arrastar, Shift)  |  Dir: mover/atacar  |  Ctrl+1-9: criar grupo, 1-9: chamar (2x: câmera)  |  F1-F4: formação  |  Q/E: habilidades  |  WASD/Roda: câmera  |  F11  |  Esc"
 	help.position = Vector2(16.0, 1040.0)
 	layer.add_child(help)
+
+	var mission_hud := MissionHudScript.new()
+	mission_hud.name = "MissionHud"
+	mission_hud.controller = _mission
+	add_child(mission_hud)

@@ -1,5 +1,49 @@
 # CHANGELOG
 
+## [0.0.5] Etapa E, missão (2026-11-11)
+
+### Adicionado
+- Sistema de missões (`scripts/missions/`): `MissionData`, `FocusData` e `SpawnData` como Resources, e o `MissionController`, que cria as unidades, acompanha os objetivos, soma o dano tecidual e decide vitória ou derrota.
+- `data/missions/mission_001_first_contact.tres`, a MISSÃO 001 — PRIMEIRO CONTATO:
+  - 3 NEUTROPHIL e 1 MACROPHAGE.
+  - Foco BRAVO com 2 bactérias comuns.
+  - Foco ALFA com 3 bactérias comuns e 1 bactéria encapsulada.
+- Objetivos principais: controlar cada foco, isto é, eliminar os invasores que nasceram nele e ter uma unidade dentro da área. A vitória vem quando todos os focos estão controlados.
+- Objetivo secundário: terminar com o dano tecidual abaixo de 50%.
+- Derrota: o dano tecidual chega a 100% (cada invasor vivo soma uma taxa por segundo), ou todas as unidades do jogador caem.
+- BACTÉRIA ENCAPSULADA (`data/enemies/bacteria_encapsulated.tres`): a cápsula bloqueia 60% do dano de atacantes comuns, mas atacantes ativados pela SINALIZAÇÃO POR CITOCINAS ignoram a cápsula.
+- Novos campos no `UnitData`: `capsule_protection` e `tissue_damage_rate`.
+- Interface da missão (`scripts/interface/mission_hud.gd`):
+  - Barra de dano tecidual com a taxa atual e o tempo.
+  - Painel de objetivos, com o número de invasores de cada foco.
+  - Avisos ("FOCO BRAVO CONTROLADO", "ALERTA: DANO TECIDUAL ACIMA DE 50%").
+  - Ordem de missão (briefing) com o jogo pausado.
+  - Tela final MISSÃO CUMPRIDA ou FRACASSADA, com tempo, dano tecidual, invasores eliminados, unidades perdidas e objetivos, e botões REINICIAR (R) e SAIR (Esc).
+- Marcação dos focos no chão (`mission_zones.gd`): disco, borda e nome. Ficam amarelos enquanto ativos e verdes quando controlados.
+
+### Alterado
+- O `main.gd` não tem mais unidades nem zonas fixas: tudo vem do arquivo da missão. A função `spawn_unit` passou a ser pública para a missão usar.
+- O jogo abre pausado no briefing. Enter, Espaço ou o botão INICIAR OPERAÇÃO começam a missão.
+
+### Testado
+- Teste automatizado temporário com a janela aberta, com uma partida completa jogada pelos controles:
+  - Seleção dos 4, ataque ao foco BRAVO, controle do foco e aviso.
+  - Aproximação do foco ALFA, citocinas (E) e ataque à encapsulada.
+  - Vitória em cerca de 23 s, com 22% de dano tecidual, 1 unidade perdida e o secundário cumprido.
+  - Tela final pausada com as estatísticas.
+- Também: R reinicia no briefing. A cápsula bloqueia 60% contra atacante comum e nada contra atacante ativado. Há derrota por perda das unidades e derrota por 100% de dano tecidual. O aviso dos 50% aparece, o dano tecidual não cresce durante o briefing e os botões INICIAR e REINICIAR funcionam.
+- Os testes das Etapas B, C e D continuam passando. Eles agora iniciam a missão e desligam as regras dela, porque testam os sistemas isolados.
+
+### Não testado
+- Mouse e teclado reais (os eventos foram simulados).
+- Exportação como executável independente do Windows (critério 8 do protótipo).
+
+### Problemas conhecidos
+- Só existe o campo de teste: o `map_id` da missão ainda não escolhe mapa.
+- Os tipos de objetivo são fixos (controlar focos e limite de dano tecidual). Outros tipos exigirão novos campos.
+- A animação de morte de quem cai no último instante fica congelada na tela final, porque o jogo pausa.
+- Dano tecidual, taxas e cápsula são provisórios e sem balanceamento.
+
 ## [0.0.4] Etapa D, estratégia (2026-11-10)
 
 ### Adicionado

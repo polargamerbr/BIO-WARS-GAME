@@ -13,6 +13,7 @@ damage = 6.0
 attack_cooldown = 1.0
 attack_range = 1.5
 detection_range = 8.0
+tissue_damage_rate = 0.2
 body_shape = 1
 body_radius = 0.4
 body_height = 1.6
