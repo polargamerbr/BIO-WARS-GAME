@@ -1,0 +1,18 @@
+# Godot 4
+.godot/
+*.translation
+export_presets.cfg
+export_credentials.cfg
+
+# Builds
+/build/
+/export/
+
+# Sistema
+Thumbs.db
+.DS_Store
+
+# Ferramentas e projetos de teste locais
+Godot_v*/
+Godot_v*.exe
+novo-projeto-de-jogo/
