@@ -15,6 +15,16 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
 - **Emblema:** gota vermelha nos ombros no lugar da cruz vermelha, porque o emblema da Cruz Vermelha é protegido por lei em vários países.
 - **Paleta:** grafite e areia para o Neutrophil. O GDD v0.1 previa verde-oliva para infantaria, então o GDD precisa ser atualizado ou o oliva fica para outra classe.
 
+### D003: Navegação só com o chão como superfície andável (2026-11-10)
+- **Decisão:** a malha de navegação é gerada de um chão plano, e os obstáculos entram como bloqueios (`add_projected_obstruction` com `carve = false`). Os obstáculos continuam com colisão física própria.
+- **Motivo:** gerar a malha a partir dos colisores fazia o topo dos obstáculos virar uma superfície andável inalcançável. Clicar num obstáculo mandava a unidade para essa ilha e ela travava. Com `carve = true` o raio do agente é ignorado e o caminho encosta no obstáculo.
+- **Consequência:** o raio da malha é único (0,75 m, o do Macrophage). Mapas com relevo, rampas ou vários andares vão exigir outra abordagem.
+- **Desvio de altura:** o bake deixa a malha 0,5 m acima do chão. A região é abaixada por esse desvio, medido na hora, para as distâncias de chegada em 3D funcionarem.
+
+### D004: Atributos de unidade em `UnitData` (.tres) (2026-11-10)
+- **Decisão:** vida, velocidade e tamanho do corpo vêm de `data/units/*.tres`. Atributos de combate (alcance, dano, tempo de ataque) entram na Etapa C, quando existirem usuários deles.
+- **Valores atuais:** provisórios, como os da prancha do Neutrophil.
+
 ## Em aberto
 
 - **Recurso do jogador:** o GDD fala em "recursos iniciais" sem definir o que são. Ideia em avaliação: sinais inflamatórios para chamar reforços.

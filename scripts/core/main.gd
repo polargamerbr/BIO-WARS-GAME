@@ -4,19 +4,36 @@ extends Node3D
 ## erro em arquivo de cena. Quando o sistema de mapas existir, isto vira cena própria.
 
 const CameraRigScript := preload("res://scripts/core/camera_rig.gd")
+const SelectionControllerScript := preload("res://scripts/core/selection_controller.gd")
+const UnitScript := preload("res://scripts/units/unit.gd")
 
 const MAP_SIZE := 80.0
+const START_ZONE_CENTER := Vector3(-24.0, 0.0, 18.0)
+
+## Unidades iniciais do teste, com a posição relativa ao centro da área inicial.
+const STARTING_UNITS := [
+	["res://data/units/neutrophil.tres", Vector3(-1.6, 0.0, -1.6)],
+	["res://data/units/neutrophil.tres", Vector3(1.6, 0.0, -1.6)],
+	["res://data/units/neutrophil.tres", Vector3(-1.6, 0.0, 1.6)],
+	["res://data/units/macrophage.tres", Vector3(1.6, 0.0, 1.6)],
+]
 
 var _fps_label: Label
+var _nav_region: NavigationRegion3D
+var _obstacle_boxes: Array[AABB] = []
 
 
 func _ready() -> void:
 	_build_environment()
+	_build_navigation_region()
 	_build_ground()
-	_build_grid()
 	_build_obstacles()
+	_bake_navigation()
+	_build_grid()
 	_build_zones()
 	_build_camera()
+	_spawn_units()
+	_build_selection()
 	_build_hud()
 
 
@@ -55,17 +72,81 @@ func _build_environment() -> void:
 	add_child(sun)
 
 
+func _build_navigation_region() -> void:
+	_nav_region = NavigationRegion3D.new()
+	_nav_region.name = "NavigationRegion"
+	add_child(_nav_region)
+
+
+func _bake_navigation() -> void:
+	## Só o chão é superfície andável. Os obstáculos entram como bloqueios que recortam a malha,
+	## senão o topo deles viraria uma ilha navegável impossível de alcançar.
+	## O raio do agente (0,75 m) cobre a maior unidade, o Macrophage.
+	var nav_mesh := NavigationMesh.new()
+	nav_mesh.cell_size = 0.25
+	nav_mesh.cell_height = 0.25
+	nav_mesh.agent_radius = 0.75
+	nav_mesh.agent_height = 2.0
+
+	var source := NavigationMeshSourceGeometryData3D.new()
+	var h := MAP_SIZE * 0.5
+	var ground_faces := PackedVector3Array([
+		Vector3(-h, 0.0, -h), Vector3(h, 0.0, -h), Vector3(h, 0.0, h),
+		Vector3(-h, 0.0, -h), Vector3(h, 0.0, h), Vector3(-h, 0.0, h),
+	])
+	source.add_faces(ground_faces, Transform3D.IDENTITY)
+	for box in _obstacle_boxes:
+		var lo := box.position
+		var hi := box.end
+		var outline := PackedVector3Array([
+			Vector3(lo.x, 0.0, lo.z), Vector3(hi.x, 0.0, lo.z),
+			Vector3(hi.x, 0.0, hi.z), Vector3(lo.x, 0.0, hi.z),
+		])
+		# carve = false para o raio do agente também afastar o caminho dos obstáculos.
+		source.add_projected_obstruction(outline, 0.0, box.size.y, false)
+
+	NavigationServer3D.bake_from_source_geometry_data(nav_mesh, source)
+	_nav_region.navigation_mesh = nav_mesh
+
+	# O bake deixa a malha um pouco acima do chão. Abaixa a região por esse desvio, para a
+	# malha ficar em y = 0 junto com os pés das unidades (as distâncias de chegada são em 3D).
+	var lowest := INF
+	for v in nav_mesh.get_vertices():
+		lowest = minf(lowest, v.y)
+	_nav_region.position.y = -lowest
+
+
+func _add_static_block(
+	block_name: String, center: Vector3, size: Vector3, material: Material, blocks_navigation := false
+) -> void:
+	## Bloco sólido com colisão (camada do mundo) e malha visível.
+	if blocks_navigation:
+		_obstacle_boxes.append(AABB(center - size * 0.5, size))
+	var body := StaticBody3D.new()
+	body.name = block_name
+	body.collision_layer = Unit.LAYER_WORLD
+	body.collision_mask = 0
+	body.position = center
+	var shape := BoxShape3D.new()
+	shape.size = size
+	var collider := CollisionShape3D.new()
+	collider.shape = shape
+	body.add_child(collider)
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	mesh.material = material
+	var visual := MeshInstance3D.new()
+	visual.mesh = mesh
+	body.add_child(visual)
+	_nav_region.add_child(body)
+
+
 func _build_ground() -> void:
-	var mesh := PlaneMesh.new()
-	mesh.size = Vector2(MAP_SIZE, MAP_SIZE)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = Color(0.36, 0.08, 0.10)
 	mat.roughness = 0.85
-	mesh.material = mat
-	var ground := MeshInstance3D.new()
-	ground.name = "Ground"
-	ground.mesh = mesh
-	add_child(ground)
+	# Placa de 1 m de espessura com o topo em y = 0.
+	_add_static_block("Ground", Vector3(0.0, -0.5, 0.0), Vector3(MAP_SIZE, 1.0, MAP_SIZE), mat)
 
 
 func _build_grid() -> void:
@@ -106,14 +187,7 @@ func _build_obstacles() -> void:
 	mat.roughness = 0.9
 	var i := 0
 	for o in obstacles:
-		var mesh := BoxMesh.new()
-		mesh.size = o[1]
-		mesh.material = mat
-		var block := MeshInstance3D.new()
-		block.name = "Obstacle%d" % i
-		block.mesh = mesh
-		block.position = o[0]
-		add_child(block)
+		_add_static_block("Obstacle%d" % i, o[0], o[1], mat, true)
 		i += 1
 
 
@@ -148,12 +222,26 @@ func _build_camera() -> void:
 	add_child(rig)
 
 
+func _spawn_units() -> void:
+	for entry in STARTING_UNITS:
+		var unit := UnitScript.new() as Unit
+		unit.setup(load(entry[0]) as UnitData)
+		unit.position = START_ZONE_CENTER + (entry[1] as Vector3)
+		add_child(unit)
+
+
+func _build_selection() -> void:
+	var controller := SelectionControllerScript.new()
+	controller.name = "SelectionController"
+	add_child(controller)
+
+
 func _build_hud() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 
 	var title := Label.new()
-	title.text = "BIOWAR: FRONTLINE  |  Prototype 001  |  Etapa A: fundação"
+	title.text = "BIOWAR: FRONTLINE  |  Prototype 001  |  Etapa B: controle"
 	title.position = Vector2(16.0, 12.0)
 	layer.add_child(title)
 
@@ -162,6 +250,6 @@ func _build_hud() -> void:
 	layer.add_child(_fps_label)
 
 	var help := Label.new()
-	help.text = "WASD ou setas: mover câmera   |   Roda do mouse: zoom   |   F11: tela cheia   |   Esc: sair"
+	help.text = "Esq: selecionar (arrastar: vários, Shift: somar)   |   Dir: mover   |   WASD/setas: câmera   |   Roda: zoom   |   F11: tela cheia   |   Esc: sair"
 	help.position = Vector2(16.0, 1040.0)
 	layer.add_child(help)

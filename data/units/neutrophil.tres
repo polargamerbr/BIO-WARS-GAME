@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/unit_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"neutrophil"
+display_name = "NEUTROPHIL"
+category = 0
+max_health = 100.0
+move_speed = 6.0
+body_radius = 0.5
+body_height = 1.8
+body_color = Color(0.55, 0.47, 0.33, 1)
