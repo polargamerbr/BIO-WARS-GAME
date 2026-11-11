@@ -6,9 +6,21 @@ extends Node3D
 const CameraRigScript := preload("res://scripts/core/camera_rig.gd")
 const SelectionControllerScript := preload("res://scripts/core/selection_controller.gd")
 const UnitScript := preload("res://scripts/units/unit.gd")
+const CombatFxScript := preload("res://scripts/combat/combat_fx.gd")
+const HealthBarsScript := preload("res://scripts/interface/health_bars.gd")
 
 const MAP_SIZE := 80.0
 const START_ZONE_CENTER := Vector3(-24.0, 0.0, 18.0)
+const INVASION_ZONE_CENTER := Vector3(22.0, 0.0, -16.0)
+
+## Inimigos iniciais, com a posição relativa ao centro da área de invasão.
+const STARTING_ENEMIES := [
+	["res://data/enemies/bacteria_common.tres", Vector3(0.0, 0.0, -3.0)],
+	["res://data/enemies/bacteria_common.tres", Vector3(2.8, 0.0, -1.0)],
+	["res://data/enemies/bacteria_common.tres", Vector3(1.8, 0.0, 2.4)],
+	["res://data/enemies/bacteria_common.tres", Vector3(-1.8, 0.0, 2.4)],
+	["res://data/enemies/bacteria_common.tres", Vector3(-2.8, 0.0, -1.0)],
+]
 
 ## Unidades iniciais do teste, com a posição relativa ao centro da área inicial.
 const STARTING_UNITS := [
@@ -20,6 +32,7 @@ const STARTING_UNITS := [
 
 var _fps_label: Label
 var _nav_region: NavigationRegion3D
+var _combat_fx: Node3D
 var _obstacle_boxes: Array[AABB] = []
 
 
@@ -223,11 +236,21 @@ func _build_camera() -> void:
 
 
 func _spawn_units() -> void:
+	_combat_fx = CombatFxScript.new()
+	_combat_fx.name = "CombatFx"
+	add_child(_combat_fx)
 	for entry in STARTING_UNITS:
-		var unit := UnitScript.new() as Unit
-		unit.setup(load(entry[0]) as UnitData)
-		unit.position = START_ZONE_CENTER + (entry[1] as Vector3)
-		add_child(unit)
+		_spawn_unit(entry[0], START_ZONE_CENTER + (entry[1] as Vector3), Unit.Team.PLAYER)
+	for entry in STARTING_ENEMIES:
+		_spawn_unit(entry[0], INVASION_ZONE_CENTER + (entry[1] as Vector3), Unit.Team.ENEMY)
+
+
+func _spawn_unit(data_path: String, pos: Vector3, team: Unit.Team) -> void:
+	var unit := UnitScript.new() as Unit
+	unit.setup(load(data_path) as UnitData, team)
+	unit.position = pos
+	add_child(unit)
+	_combat_fx.watch(unit)
 
 
 func _build_selection() -> void:
@@ -240,8 +263,10 @@ func _build_hud() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 
+	layer.add_child(HealthBarsScript.new())
+
 	var title := Label.new()
-	title.text = "BIOWAR: FRONTLINE  |  Prototype 001  |  Etapa B: controle"
+	title.text = "BIOWAR: FRONTLINE  |  Prototype 001  |  Etapa C: combate"
 	title.position = Vector2(16.0, 12.0)
 	layer.add_child(title)
 
@@ -250,6 +275,6 @@ func _build_hud() -> void:
 	layer.add_child(_fps_label)
 
 	var help := Label.new()
-	help.text = "Esq: selecionar (arrastar: vários, Shift: somar)   |   Dir: mover   |   WASD/setas: câmera   |   Roda: zoom   |   F11: tela cheia   |   Esc: sair"
+	help.text = "Esq: selecionar (arrastar: vários, Shift: somar)   |   Dir: mover ou atacar   |   WASD/setas: câmera   |   Roda: zoom   |   F11: tela cheia   |   Esc: sair"
 	help.position = Vector2(16.0, 1040.0)
 	layer.add_child(help)

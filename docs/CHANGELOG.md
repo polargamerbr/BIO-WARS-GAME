@@ -1,5 +1,36 @@
 # CHANGELOG
 
+## [0.0.3] Etapa C, combate (2026-11-10)
+
+### Adicionado
+- Atributos de combate no `UnitData`: dano, tempo entre ataques, alcance de ataque (entre as bordas dos corpos) e alcance de detecção. Forma do corpo: soldado em pé ou bastonete deitado.
+- Inimigo `data/enemies/bacteria_common.tres` (BACTÉRIA COMUM). Cinco deles na área de invasão.
+- Máquina de estados na `Unit`, igual para aliados e inimigos: IDLE (procura alvo a cada 0,25 s), MOVING (ordem de movimento, ignora inimigos), ATTACKING (persegue pela navegação e ataca no alcance e com linha de visão) e DEAD.
+- Linha de visão: obstáculos bloqueiam a detecção e o ataque.
+- Revide: unidade parada que toma dano ataca quem a atingiu.
+- Eliminação: a unidade morta sai do grupo, perde colisão, encolhe e é removida da cena.
+- Clique direito em um inimigo dá ordem de ataque (marcador amarelo). Inimigos não podem ser selecionados.
+- `scripts/interface/health_bars.gd`: barra de vida sobre cada unidade (verde para aliados, vermelha com pouca vida, amarela para inimigos).
+- `scripts/combat/combat_fx.gd`: traço e clarão provisórios a cada ataque.
+
+### Alterado
+- O painel da seleção se atualiza durante o combate e tira unidades mortas.
+
+### Testado
+- Teste automatizado temporário com a janela aberta. Unidades distantes ficam paradas. A linha de visão é bloqueada pelo obstáculo e fica livre em campo aberto. Clicar ou arrastar sobre inimigos não os seleciona. A ordem de ataque coloca os 4 aliados em ATTACKING. Os 5 inimigos são eliminados em cerca de 17 s (1 NEUTROPHIL morreu e as bactérias revidaram). Ninguém entrou em obstáculo, os aliados voltaram a IDLE, os mortos saíram da cena e da seleção.
+- O teste da Etapa B continua passando. O jogo abre em modo headless por 300 quadros sem erros.
+
+### Não testado
+- Mouse e teclado reais (os eventos foram simulados).
+- Desempenho com muitas unidades. A busca de alvos compara todas as unidades entre si.
+
+### Problemas conhecidos
+- Valores de vida, dano e alcance são provisórios e sem balanceamento.
+- Ainda falta a bactéria com característica especial do protótipo.
+- Os inimigos não patrulham nem se reproduzem. A IA é só detectar, perseguir e atacar.
+- Ataque é instantâneo, sem projétil.
+- A bactéria (verde-amarelada) se confunde com a área de invasão amarela.
+
 ## [0.0.2] Etapa B, controle (2026-11-10)
 
 ### Adicionado

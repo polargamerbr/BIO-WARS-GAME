@@ -4,14 +4,18 @@ extends Node
 ##   Clique esquerdo: seleciona uma unidade (clicar no vazio limpa a seleção).
 ##   Arrastar com o esquerdo: seleciona todas as unidades dentro do retângulo.
 ##   Shift: soma à seleção (ou tira, no clique em uma unidade já selecionada).
-##   Clique direito: manda as unidades selecionadas para o ponto.
+##   Clique direito no chão: manda as unidades selecionadas para o ponto.
+##   Clique direito em um inimigo: ordem de ataque a ele.
+## Só unidades do jogador podem ser selecionadas.
 ## A seleção não interfere no movimento: só guarda quais unidades receberão a ordem.
 
 const DRAG_THRESHOLD := 6.0  ## Pixels que separam clique de arrasto.
 const RAY_LENGTH := 500.0
 const SLOT_GAP := 0.8  ## Espaço entre as unidades ao distribuir o destino, além dos corpos.
+const INFO_REFRESH := 0.1  ## Segundos entre atualizações do painel (a vida muda em combate).
 
 var _selected: Array[Unit] = []
+var _info_timer := 0.0
 var _pressing := false
 var _dragging := false
 var _press_pos := Vector2.ZERO
@@ -47,7 +51,15 @@ func _ready() -> void:
 
 
 func get_selected() -> Array[Unit]:
+	_prune_selection()
 	return _selected
+
+
+func _process(delta: float) -> void:
+	_info_timer -= delta
+	if _info_timer <= 0.0:
+		_info_timer = INFO_REFRESH
+		_refresh_info()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -61,7 +73,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			elif _pressing:
 				_finish_press(button.position, button.shift_pressed)
 		elif button.button_index == MOUSE_BUTTON_RIGHT and button.pressed:
-			_order_move(button.position)
+			_order(button.position)
 		return
 
 	var motion := event as InputEventMouseMotion
@@ -90,6 +102,8 @@ func _click_select(pos: Vector2, additive: bool) -> void:
 	var unit: Unit = null
 	if not hit.is_empty():
 		unit = hit["collider"] as Unit
+	if unit != null and not _is_selectable(unit):
+		unit = null
 	if unit == null:
 		if not additive:
 			_clear_selection()
@@ -107,6 +121,8 @@ func _box_select(rect: Rect2, additive: bool) -> void:
 		_clear_selection()
 	for node in get_tree().get_nodes_in_group(Unit.GROUP):
 		var unit := node as Unit
+		if not _is_selectable(unit):
+			continue
 		var center := unit.get_center()
 		if camera.is_position_behind(center):
 			continue
@@ -115,10 +131,22 @@ func _box_select(rect: Rect2, additive: bool) -> void:
 	_refresh_info()
 
 
-func _order_move(pos: Vector2) -> void:
+func _order(pos: Vector2) -> void:
 	_prune_selection()
 	if _selected.is_empty():
 		return
+	var unit_hit := _raycast(pos, Unit.LAYER_UNITS)
+	if not unit_hit.is_empty():
+		var enemy := unit_hit["collider"] as Unit
+		if enemy != null and enemy.is_alive() and enemy.team != Unit.Team.PLAYER:
+			for unit in _selected:
+				unit.attack(enemy)
+			_spawn_marker(enemy.global_position, Color(1.0, 0.75, 0.15, 0.9))
+			return
+	_order_move(pos)
+
+
+func _order_move(pos: Vector2) -> void:
 	var hit := _raycast(pos, Unit.LAYER_WORLD)
 	if hit.is_empty():
 		return
@@ -127,7 +155,7 @@ func _order_move(pos: Vector2) -> void:
 	var slots := _grid_slots(point)
 	for i in _selected.size():
 		_selected[i].move_to(slots[i])
-	_spawn_marker(point)
+	_spawn_marker(point, Color(0.35, 1.0, 0.45, 0.9))
 
 
 func _grid_slots(center: Vector3) -> Array[Vector3]:
@@ -147,14 +175,14 @@ func _grid_slots(center: Vector3) -> Array[Vector3]:
 	return slots
 
 
-func _spawn_marker(point: Vector3) -> void:
+func _spawn_marker(point: Vector3, color: Color) -> void:
 	var torus := TorusMesh.new()
 	torus.inner_radius = 0.5
 	torus.outer_radius = 0.7
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = Color(0.35, 1.0, 0.45, 0.9)
+	mat.albedo_color = color
 	torus.material = mat
 	var marker := MeshInstance3D.new()
 	marker.mesh = torus
@@ -190,9 +218,13 @@ func _clear_selection() -> void:
 	_selected.clear()
 
 
+func _is_selectable(unit: Unit) -> bool:
+	return unit.team == Unit.Team.PLAYER and unit.is_alive()
+
+
 func _prune_selection() -> void:
 	for i in range(_selected.size() - 1, -1, -1):
-		if not is_instance_valid(_selected[i]):
+		if not is_instance_valid(_selected[i]) or not _selected[i].is_alive():
 			_selected.remove_at(i)
 
 

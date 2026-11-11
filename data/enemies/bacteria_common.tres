@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/unit_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"bacteria_common"
+display_name = "BACTÉRIA COMUM"
+category = 3
+max_health = 60.0
+move_speed = 3.0
+damage = 6.0
+attack_cooldown = 1.0
+attack_range = 1.5
+detection_range = 8.0
+body_shape = 1
+body_radius = 0.4
+body_height = 1.6
+body_color = Color(0.62, 0.66, 0.22, 1)
