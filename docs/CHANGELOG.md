@@ -1,5 +1,51 @@
 # CHANGELOG
 
+## [0.0.4] Etapa D, estratégia (2026-11-10)
+
+### Adicionado
+- Grupos de controle: Ctrl + 1 a 9 cria o grupo, 1 a 9 chama, apertar duas vezes centraliza a câmera. O painel da seleção mostra o número do grupo.
+- `FormationManager` (`scripts/formations/`) com quatro formações em `data/formations/*.tres`. F1 a F4 ou os botões do painel trocam a formação e reorganizam a seleção no lugar.
+  - LINHA (padrão): frente larga, de lado para o destino.
+  - COMPACTA: bloco fechado. O grupo anda na velocidade da unidade mais lenta.
+  - DEFENSIVA: círculo voltado para fora. Mantém posição sem perseguir, recebe 25% menos dano parada e anda junto.
+  - DISPERSA: espaçamento largo.
+- Cada unidade recebe uma posição da formação (o par unidade-posição mais próximo primeiro, para não se cruzarem) e chega virada para a frente da formação.
+- Habilidades (`AbilityData`, `data/abilities/*.tres`), ligadas às unidades pelo `UnitData`:
+  - Q, MOBILIZAÇÃO RÁPIDA (NEUTROPHIL): +60% de velocidade por 5 s, recarga de 18 s.
+  - E, SINALIZAÇÃO POR CITOCINAS (MACROPHAGE): aliados a até 8 m causam +30% de dano por 8 s, recarga de 25 s.
+- Painel de comandos no canto inferior direito, com os botões de formação e de habilidades (com tempo de recarga).
+- Indicadores de efeito ativo ao lado da barra de vida (ciano: velocidade, laranja: dano) e anel visual ao usar habilidade.
+- Novo estado DEFENDING (manter posição) na máquina de estados.
+- Retorno à formação: depois de um combate que a unidade começou sozinha, ela volta para a sua posição. Depois de uma ordem de ataque do jogador, ela fica onde terminou.
+- O alvo automático é abandonado pela distância da posição de formação, e não da unidade. Isso evita que o grupo seja arrastado para longe, e vale também para as bactérias, que voltam para a área delas.
+
+### Alterado
+- A ordem de movimento usa a formação atual no lugar da grade provisória da Etapa B.
+- A chegada ao destino ficou mais precisa (0,35 m), para as formações saírem alinhadas.
+- O texto de ajuda do HUD foi atualizado.
+
+### Testado
+- Teste automatizado temporário com a janela aberta:
+  - Grupos de controle: criar, chamar e centralizar a câmera.
+  - LINHA: mesma profundidade, lado a lado e viradas para o destino.
+  - COMPACTA: ninguém passa de 3,5 m/s e o bloco fecha em raio de 1,1 m.
+  - DEFENSIVA: círculo, estado DEFENDING, viradas para fora e 25% menos dano. Não persegue inimigo fora do alcance e mata atacantes sem sair do lugar.
+  - LINHA: persegue um inimigo detectado e volta para a posição.
+  - Habilidades por tecla e por clique no botão, recarga, botão desabilitado e efeitos que expiram.
+  - DISPERSA: folga mínima de 3,2 m entre corpos.
+  - Clicar no painel não altera a seleção.
+- Os testes das Etapas B e C continuam passando. O critério de "perto do alvo" da Etapa B foi ampliado para a largura da LINHA. O jogo abre em modo headless sem erros.
+
+### Não testado
+- Mouse e teclado reais (os eventos foram simulados).
+- Grupos com mais de 4 unidades e formações com várias fileiras.
+
+### Problemas conhecidos
+- A formação é uma escolha global: vale para a próxima ordem de qualquer seleção.
+- Posições de formação que caem dentro de obstáculos são empurradas para fora e podem ficar próximas umas das outras.
+- A DISPERSA ainda não tem vantagem em combate. Isso depende de ataques em área, que não existem.
+- Valores de formação e habilidade são provisórios e sem balanceamento.
+
 ## [0.0.3] Etapa C, combate (2026-11-10)
 
 ### Adicionado

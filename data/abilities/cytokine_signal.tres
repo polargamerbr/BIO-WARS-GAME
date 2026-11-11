@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/ability_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"cytokine_signal"
+display_name = "SINALIZAÇÃO POR CITOCINAS"
+description = "O macrófago libera citocinas que ativam as células de defesa próximas. Aliados a até 8 m causam +30% de dano por 8 s."
+hotkey = 69
+cooldown = 25.0
+duration = 8.0
+radius = 8.0
+effect = 1
+magnitude = 1.3

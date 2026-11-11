@@ -1,6 +1,8 @@
-[gd_resource type="Resource" script_class="UnitData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="UnitData" load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/units/unit_data.gd" id="1_data"]
+[ext_resource type="Script" path="res://scripts/abilities/ability_data.gd" id="2_ability_script"]
+[ext_resource type="Resource" path="res://data/abilities/cytokine_signal.tres" id="3_cytokines"]
 
 [resource]
 script = ExtResource("1_data")
@@ -13,6 +15,7 @@ damage = 20.0
 attack_cooldown = 1.4
 attack_range = 2.0
 detection_range = 8.0
+abilities = Array[ExtResource("2_ability_script")]([ExtResource("3_cytokines")])
 body_shape = 0
 body_radius = 0.75
 body_height = 2.2

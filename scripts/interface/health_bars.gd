@@ -9,6 +9,10 @@ const COLOR_PLAYER := Color(0.3, 0.9, 0.35)
 const COLOR_PLAYER_LOW := Color(0.95, 0.3, 0.25)  ## Aliado com pouca vida.
 const COLOR_ENEMY := Color(0.95, 0.7, 0.15)  ## Amarelo: ameaça (GDD 2.2).
 const LOW_HEALTH := 0.35
+const EFFECT_COLORS := {
+	AbilityData.Effect.SPEED: Color(0.3, 0.85, 1.0),
+	AbilityData.Effect.DAMAGE: Color(1.0, 0.45, 0.3),
+}
 
 
 func _init() -> void:
@@ -37,3 +41,13 @@ func _draw() -> void:
 			color = COLOR_PLAYER_LOW if ratio < LOW_HEALTH else COLOR_PLAYER
 		draw_rect(rect.grow(1.0), COLOR_BACK)
 		draw_rect(Rect2(rect.position, Vector2(rect.size.x * ratio, rect.size.y)), color)
+		_draw_effects(unit, rect)
+
+
+## Quadradinhos à direita da barra para cada efeito de habilidade ativo.
+func _draw_effects(unit: Unit, bar: Rect2) -> void:
+	var x := bar.end.x + 3.0
+	for effect in EFFECT_COLORS:
+		if unit.effect_remaining(effect) > 0.0:
+			draw_rect(Rect2(Vector2(x, bar.position.y - 1.0), Vector2(6.0, 6.0)), EFFECT_COLORS[effect])
+			x += 8.0

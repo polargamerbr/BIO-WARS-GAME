@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="FormationData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/formations/formation_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"spread"
+display_name = "DISPERSA"
+description = "Espaçamento largo. Menos congestionamento ao se deslocar e cobre mais área."
+hotkey = 4194335
+layout = 1
+gap = 3.5
+damage_taken_multiplier = 1.0
+hold_position = false
+move_together = false

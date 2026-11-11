@@ -8,6 +8,8 @@ const SelectionControllerScript := preload("res://scripts/core/selection_control
 const UnitScript := preload("res://scripts/units/unit.gd")
 const CombatFxScript := preload("res://scripts/combat/combat_fx.gd")
 const HealthBarsScript := preload("res://scripts/interface/health_bars.gd")
+const CommandPanelScript := preload("res://scripts/interface/command_panel.gd")
+const FormationManagerScript := preload("res://scripts/formations/formation_manager.gd")
 
 const MAP_SIZE := 80.0
 const START_ZONE_CENTER := Vector3(-24.0, 0.0, 18.0)
@@ -33,6 +35,7 @@ const STARTING_UNITS := [
 var _fps_label: Label
 var _nav_region: NavigationRegion3D
 var _combat_fx: Node3D
+var _selection: SelectionController
 var _obstacle_boxes: Array[AABB] = []
 
 
@@ -254,9 +257,13 @@ func _spawn_unit(data_path: String, pos: Vector3, team: Unit.Team) -> void:
 
 
 func _build_selection() -> void:
-	var controller := SelectionControllerScript.new()
-	controller.name = "SelectionController"
-	add_child(controller)
+	var formations := FormationManagerScript.new() as FormationManager
+	formations.name = "FormationManager"
+	add_child(formations)
+	_selection = SelectionControllerScript.new() as SelectionController
+	_selection.name = "SelectionController"
+	_selection.formation_manager = formations
+	add_child(_selection)
 
 
 func _build_hud() -> void:
@@ -265,8 +272,13 @@ func _build_hud() -> void:
 
 	layer.add_child(HealthBarsScript.new())
 
+	var panel := CommandPanelScript.new()
+	panel.name = "CommandPanel"
+	panel.selection = _selection
+	layer.add_child(panel)
+
 	var title := Label.new()
-	title.text = "BIOWAR: FRONTLINE  |  Prototype 001  |  Etapa C: combate"
+	title.text = "BIOWAR: FRONTLINE  |  Prototype 001  |  Etapa D: estratégia"
 	title.position = Vector2(16.0, 12.0)
 	layer.add_child(title)
 
@@ -275,6 +287,6 @@ func _build_hud() -> void:
 	layer.add_child(_fps_label)
 
 	var help := Label.new()
-	help.text = "Esq: selecionar (arrastar: vários, Shift: somar)   |   Dir: mover ou atacar   |   WASD/setas: câmera   |   Roda: zoom   |   F11: tela cheia   |   Esc: sair"
+	help.text = "Esq: selecionar (arrastar, Shift)  |  Dir: mover/atacar  |  Ctrl+1-9: criar grupo, 1-9: chamar (2x: câmera)  |  F1-F4: formação  |  Q/E: habilidades  |  WASD/Roda: câmera  |  F11  |  Esc"
 	help.position = Vector2(16.0, 1040.0)
 	layer.add_child(help)

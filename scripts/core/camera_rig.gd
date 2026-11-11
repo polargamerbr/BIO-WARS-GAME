@@ -44,6 +44,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		_target_size = clampf(_target_size + zoom_step, zoom_size_min, zoom_size_max)
 
 
+## Centraliza a câmera no ponto, respeitando o limite do mapa.
+func focus_on(point: Vector3) -> void:
+	position.x = clampf(point.x, -map_half_extent, map_half_extent)
+	position.z = clampf(point.z, -map_half_extent, map_half_extent)
+
+
 func _pan(delta: float) -> void:
 	var dir := Vector2.ZERO
 	if Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP):

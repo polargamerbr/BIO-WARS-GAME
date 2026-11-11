@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="FormationData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/formations/formation_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"defensive"
+display_name = "DEFENSIVA"
+description = "Círculo voltado para fora. Mantém a posição sem perseguir, recebe 25% menos dano parada e anda junto."
+hotkey = 4194334
+layout = 2
+gap = 0.6
+damage_taken_multiplier = 0.75
+hold_position = true
+move_together = true

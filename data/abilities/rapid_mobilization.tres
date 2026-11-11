@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="AbilityData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/abilities/ability_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"rapid_mobilization"
+display_name = "MOBILIZAÇÃO RÁPIDA"
+description = "Quimiotaxia: o neutrófilo acelera em direção ao foco de infecção. +60% de velocidade por 5 s."
+hotkey = 81
+cooldown = 18.0
+duration = 5.0
+radius = 0.0
+effect = 0
+magnitude = 1.6

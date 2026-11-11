@@ -19,6 +19,9 @@ enum BodyShape { UPRIGHT, ROD }  ## UPRIGHT: soldado em pé. ROD: bastonete deit
 @export var attack_range: float = 1.5  ## Metros entre as bordas dos dois corpos.
 @export var detection_range: float = 8.0  ## Metros. Até onde a unidade parada percebe inimigos.
 
+@export_group("Habilidades")
+@export var abilities: Array[AbilityData] = []
+
 @export_group("Corpo provisório")
 @export var body_shape: BodyShape = BodyShape.UPRIGHT
 @export var body_radius: float = 0.5  ## Metros. Também é o raio do agente de navegação.

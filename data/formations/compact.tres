@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="FormationData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/formations/formation_data.gd" id="1_data"]
+
+[resource]
+script = ExtResource("1_data")
+id = &"compact"
+display_name = "COMPACTA"
+description = "Bloco fechado. O grupo anda na velocidade da unidade mais lenta e chega junto."
+hotkey = 4194333
+layout = 1
+gap = 0.3
+damage_taken_multiplier = 1.0
+hold_position = false
+move_together = true

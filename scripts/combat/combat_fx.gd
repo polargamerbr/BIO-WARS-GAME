@@ -9,6 +9,21 @@ const COLOR_ENEMY := Color(0.85, 0.9, 0.3, 0.9)
 
 func watch(unit: Unit) -> void:
 	unit.attack_performed.connect(_on_attack_performed)
+	unit.ability_used.connect(_on_ability_used)
+
+
+## Anel que se expande até o raio da habilidade (ou em volta da unidade, se for só nela).
+func _on_ability_used(unit: Unit, ability: AbilityData) -> void:
+	var color := Color(0.3, 0.85, 1.0, 0.8) if ability.effect == AbilityData.Effect.SPEED else Color(1.0, 0.45, 0.3, 0.8)
+	var final_radius := ability.radius if ability.radius > 0.0 else unit.data.body_radius + 0.8
+	var torus := TorusMesh.new()
+	torus.inner_radius = 0.9
+	torus.outer_radius = 1.0
+	var ring := _spawn_fading(torus, color, 0.6)
+	ring.global_position = unit.global_position + Vector3.UP * 0.1
+	ring.scale = Vector3(0.3, 0.2, 0.3)
+	var grow := ring.create_tween()
+	grow.tween_property(ring, "scale", Vector3(final_radius, 0.2, final_radius), 0.6)
 
 
 func _on_attack_performed(attacker: Unit, target: Unit) -> void:
@@ -41,7 +56,7 @@ func _spawn_flash(at: Vector3, color: Color) -> void:
 	piece.global_position = at
 
 
-func _spawn_fading(mesh: PrimitiveMesh, color: Color) -> MeshInstance3D:
+func _spawn_fading(mesh: PrimitiveMesh, color: Color, duration: float = DURATION) -> MeshInstance3D:
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -52,6 +67,6 @@ func _spawn_fading(mesh: PrimitiveMesh, color: Color) -> MeshInstance3D:
 	piece.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(piece)
 	var tween := piece.create_tween()
-	tween.tween_property(mat, "albedo_color:a", 0.0, DURATION)
+	tween.tween_property(mat, "albedo_color:a", 0.0, duration)
 	tween.tween_callback(piece.queue_free)
 	return piece

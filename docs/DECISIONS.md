@@ -34,6 +34,20 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
 - **Decisão:** aliados e inimigos usam a mesma `Unit`, diferenciados pelo time (`Team`) e pelo `UnitData`. A IA inicial dos inimigos é a mesma máquina de estados dos aliados.
 - **Motivo:** o combate fica simétrico e não há código duplicado. Comportamentos próprios de inimigos (patrulha, reprodução, resistência) entram depois, no sistema biológico, sem mudar essa base.
 
+### D007: Consequências das formações (2026-11-10, provisória)
+- **Decisão:** cada formação muda o comportamento do grupo, além do desenho. Os efeitos estão nos `.tres` de `data/formations/`.
+  - LINHA: sem efeito (referência).
+  - COMPACTA: anda na velocidade da unidade mais lenta.
+  - DEFENSIVA: mantém posição sem perseguir, recebe 25% menos dano parada e anda junto.
+  - DISPERSA: espaçamento de 3,5 m.
+- **Motivo:** o GDD pede consequências reais na movimentação, proteção e eficiência. Mudar só o desenho não atenderia.
+- **Pendente:** a DISPERSA só ganha sentido em combate quando existirem ataques em área. A formação é global, e não por grupo.
+
+### D008: Primeiras habilidades com base biológica (2026-11-10, provisória)
+- **NEUTROPHIL, MOBILIZAÇÃO RÁPIDA:** representa a quimiotaxia, a migração rápida do neutrófilo até o foco de infecção. É um aumento de velocidade na própria unidade.
+- **MACROPHAGE, SINALIZAÇÃO POR CITOCINAS:** representa as citocinas inflamatórias que ativam as células de defesa próximas. É um aumento de dano nos aliados em volta.
+- **Regra:** os efeitos não acumulam. Usar de novo só renova a duração, e as habilidades não afetam inimigos.
+
 ## Em aberto
 
 - **Recurso do jogador:** o GDD fala em "recursos iniciais" sem definir o que são. Ideia em avaliação: sinais inflamatórios para chamar reforços.
