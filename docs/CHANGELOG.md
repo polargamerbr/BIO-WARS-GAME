@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## [0.2.1] Artes de referência e chão texturizado (2026-11-11)
+
+### Adicionado
+- Artes de referência geradas no Gemini, organizadas nas pastas do jogo:
+  - `assets/units/neutrophil/reference/`: `neutrophil_front.png` e `neutrophil_back.png` (vistas oficiais exportadas do Meshy, D002) e `neutrophil_rifle_side.jpeg`.
+  - `assets/units/macrophage/reference/`: `macrophage_front.jpeg` e `macrophage_back.jpeg`.
+  - `assets/enemies/bacteria/reference/`: `bacteria_common_front.jpeg`, `bacteria_common_back.jpeg` e `bacteria_encapsulated_front.jpeg`.
+  - `assets/environments/reference/tissue_obstacle.jpeg`.
+  - `docs/art/concept/`: arte conceitual (escudo de bioenergia do MACROPHAGE e NEUTROPHIL em combate). Não é para converter em 3D.
+- `assets/environments/textures/tissue_ground.jpeg`: textura repetível de tecido aplicada ao chão do mapa. Usa projeção pelo mundo, com uma repetição a cada 24 m e brilho levemente reduzido para as unidades continuarem legíveis. Importada como textura 3D, com mipmaps e compressão de vídeo, para não serrilhar com a câmera afastada.
+
+### Alterado
+- O executável deixa de fora todas as pastas `reference/` (filtro `*/reference/*`). As referências são material de arte, não conteúdo do jogo.
+- Removidos os `.import` soltos de imagens renomeadas ou apagadas em `docs/art`.
+
+### Testado
+- Capturas com a câmera perto, sobre o foco ALFA e afastada ao máximo: textura aplicada e unidades legíveis.
+- FPS estável em 100, perto e longe.
+- Executável gerado de novo (107 MB, com a textura e sem as referências), aberto fora do projeto e sem erros.
+
+### Decidido
+- NEUTROPHIL continua com o design da D002 (camuflado areia sobre preto), agora com as vistas de frente e de costas do Meshy. A versão de placas cinza do Gemini foi descartada e está em `docs/art/descartadas/`.
+
+
 ## [0.2.0] Invasores humanoides e MACROPHAGE com escudo (2026-11-11)
 
 ### Adicionado

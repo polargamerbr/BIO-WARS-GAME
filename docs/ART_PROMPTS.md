@@ -9,7 +9,7 @@ Prompts para gerar as imagens de referência no Gemini (ou outra IA de imagem) *
 3. **Mandar só a imagem aprovada para o Tripo** (imagem → modelo 3D). Uma geração por asset, em vez de várias tentativas por texto.
 4. Se o Tripo aceitar várias vistas (*multiview*), gere frente, lado e costas no Gemini e mande as três. O modelo sai mais fiel.
 5. **Armas em arquivo separado** do soldado. No Godot, a arma vai presa ao osso da mão. Isso facilita o rig, a animação e a troca de arma.
-6. Os arquivos vão para `assets/units/<unidade>/reference/` (imagens) e `assets/units/<unidade>/` (o `.glb`).
+6. Os arquivos vão para `assets/units/<unidade>/reference/`, `assets/enemies/<tipo>/reference/` ou `assets/environments/reference/` (imagens) e para a pasta da unidade (o `.glb`). As pastas `reference/` ficam fora do executável. Arte conceitual, que não vira 3D, vai para `docs/art/concept/`.
 
 Dica: o Neutrophil já tem uma referência aprovada (`assets/units/neutrophil/reference/neutrophil_front.png`). **Anexe essa imagem no Gemini** junto com os prompts das outras unidades e peça "mesmo estilo e mesma qualidade". Assim toda a tropa fica coerente.
 
@@ -53,6 +53,8 @@ blurry, motion blur, heavy shadows.
 ---
 
 ## 1. NEUTROPHIL — vistas que faltam (lado e costas)
+
+> **Já resolvido:** as vistas oficiais de frente e de costas (design da D002) estão em `assets/units/neutrophil/reference/` e foram exportadas do Meshy. Use este prompt só se precisar da vista de lado.
 
 A frente já existe. Para o Tripo *multiview*, anexe `neutrophil_front.png` e peça:
 

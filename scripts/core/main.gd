@@ -16,6 +16,8 @@ const MissionHudScript := preload("res://scripts/interface/mission_hud.gd")
 const AudioManagerScript := preload("res://scripts/core/audio_manager.gd")
 
 const MAP_SIZE := 80.0
+const GROUND_TEXTURE := preload("res://assets/environments/textures/tissue_ground.jpeg")
+const GROUND_TILE_METERS := 24.0  ## Tamanho de cada repetição da textura do chão.
 ## Missão carregada ao abrir. Unidades, focos e condições vêm todos deste arquivo.
 const MISSION_PATH := "res://data/missions/mission_001_first_contact.tres"
 
@@ -147,8 +149,14 @@ func _add_static_block(
 
 func _build_ground() -> void:
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.36, 0.08, 0.10)
+	mat.albedo_texture = GROUND_TEXTURE
+	# Escurece um pouco a textura para as unidades continuarem fáceis de ler por cima.
+	mat.albedo_color = Color(0.8, 0.8, 0.8)
 	mat.roughness = 0.85
+	# Projeção pelo mundo (triplanar): a textura repete a cada GROUND_TILE_METERS no chão,
+	# sem depender das coordenadas de UV da caixa.
+	mat.uv1_triplanar = true
+	mat.uv1_scale = Vector3.ONE / GROUND_TILE_METERS
 	# Placa de 1 m de espessura com o topo em y = 0.
 	_add_static_block("Ground", Vector3(0.0, -0.5, 0.0), Vector3(MAP_SIZE, 1.0, MAP_SIZE), mat)
 

@@ -13,6 +13,7 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
 ### D002: Neutrophil oficial (2026-11-09)
 - **Decisão:** o design de referência é o da vista de frente e de costas em `assets/units/neutrophil/reference/`. Capacete cinza com faixa vermelha, visor azul, camuflado areia sobre preto.
 - **Emblema:** gota vermelha nos ombros no lugar da cruz vermelha, porque o emblema da Cruz Vermelha é protegido por lei em vários países.
+- **Confirmado em 2026-11-11 (diretor do projeto):** continua o design camuflado areia sobre preto. As vistas de frente e de costas oficiais são as exportadas do Meshy (`neutrophil_front.png` e `neutrophil_back.png`). A versão de placas cinza gerada no Gemini foi descartada e está guardada em `docs/art/descartadas/`. O fuzil do Gemini (`neutrophil_rifle_side.jpeg`, grafite e areia com a gota vermelha) combina com esse design e foi mantido.
 - **Paleta:** grafite e areia para o Neutrophil. O GDD v0.1 previa verde-oliva para infantaria, então o GDD precisa ser atualizado ou o oliva fica para outra classe.
 
 ### D003: Navegação só com o chão como superfície andável (2026-11-10)
