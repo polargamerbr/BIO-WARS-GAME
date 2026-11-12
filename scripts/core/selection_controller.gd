@@ -14,6 +14,8 @@ extends Node
 ## A seleção não interfere no movimento: só guarda quais unidades receberão a ordem.
 
 signal selection_changed
+signal selection_made  ## O jogador selecionou unidades (clique, arrasto ou grupo).
+signal order_issued(kind: StringName)  ## &"move" ou &"attack".
 
 const DRAG_THRESHOLD := 6.0  ## Pixels que separam clique de arrasto.
 const RAY_LENGTH := 500.0
@@ -180,6 +182,7 @@ func _recall_group(number: int) -> void:
 	for unit in group:
 		_set_unit_selected(unit, true)
 	_refresh_info()
+	selection_made.emit()
 	if double_tap:
 		_focus_camera(FormationManager.centroid(group))
 
@@ -217,6 +220,8 @@ func _click_select(pos: Vector2, additive: bool) -> void:
 		_clear_selection()
 		_set_unit_selected(unit, true)
 	_refresh_info()
+	if not _selected.is_empty():
+		selection_made.emit()
 
 
 func _box_select(rect: Rect2, additive: bool) -> void:
@@ -233,6 +238,8 @@ func _box_select(rect: Rect2, additive: bool) -> void:
 		if rect.has_point(camera.unproject_position(center)):
 			_set_unit_selected(unit, true)
 	_refresh_info()
+	if not _selected.is_empty():
+		selection_made.emit()
 
 
 func _order(pos: Vector2) -> void:
@@ -246,6 +253,7 @@ func _order(pos: Vector2) -> void:
 			for unit in _selected:
 				unit.attack(enemy)
 			_spawn_marker(enemy.global_position, Color(1.0, 0.75, 0.15, 0.9))
+			order_issued.emit(&"attack")
 			return
 	_order_move(pos)
 
@@ -257,6 +265,7 @@ func _order_move(pos: Vector2) -> void:
 	var point: Vector3 = hit["position"]
 	formation_manager.order_move(_selected, point)
 	_spawn_marker(point, Color(0.35, 1.0, 0.45, 0.9))
+	order_issued.emit(&"move")
 
 
 func _spawn_marker(point: Vector3, color: Color) -> void:

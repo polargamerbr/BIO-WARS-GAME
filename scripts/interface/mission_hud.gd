@@ -86,10 +86,27 @@ func _refresh() -> void:
 	_fill_objectives(_objectives, true)
 
 
+## Preenche a caixa com as linhas de objetivo. Se ela já tem as mesmas linhas, só troca texto
+## e cor, sem recriar os nós (o painel ao vivo é atualizado 10 vezes por segundo).
 func _fill_objectives(box: VBoxContainer, show_counts: bool) -> void:
+	var lines := _objective_lines(show_counts)
+	if box.get_child_count() == lines.size():
+		for i in lines.size():
+			var label := box.get_child(i) as Label
+			label.text = lines[i][0]
+			label.add_theme_color_override("font_color", lines[i][1])
+		return
 	for child in box.get_children():
+		box.remove_child(child)
 		child.queue_free()
-	box.add_child(_line("OBJETIVOS PRINCIPAIS", Color(0.75, 0.85, 0.75), 13))
+	for line in lines:
+		box.add_child(_line(line[0], line[1], line[2]))
+
+
+## Cada linha: [texto, cor, tamanho da fonte].
+func _objective_lines(show_counts: bool) -> Array:
+	var header := Color(0.75, 0.85, 0.75)
+	var lines := [["OBJETIVOS PRINCIPAIS", header, 13]]
 	for i in controller.mission.foci.size():
 		var focus := controller.mission.foci[i]
 		var done := controller.is_focus_controlled(i)
@@ -97,15 +114,16 @@ func _fill_objectives(box: VBoxContainer, show_counts: bool) -> void:
 		if show_counts and not done:
 			var alive := controller.focus_enemies_alive(i)
 			text += "  (%s)" % ("%d invasores" % alive if alive > 0 else "ocupe a área")
-		box.add_child(_line(text, COLOR_OK if done else COLOR_PENDING))
-	box.add_child(_line("SECUNDÁRIO", Color(0.75, 0.85, 0.75), 13))
+		lines.append([text, COLOR_OK if done else COLOR_PENDING, 16])
+	lines.append(["SECUNDÁRIO", header, 13])
 	var failed := controller.has_secondary_failed()
 	var secondary := "%s  Dano tecidual abaixo de %d%%" % ["[X]" if failed else "[  ]", controller.mission.secondary_tissue_limit]
 	var color := COLOR_BAD if failed else COLOR_PENDING
 	if controller.state == MissionController.State.WON and not failed:
 		secondary = secondary.replace("[  ]", "[OK]")
 		color = COLOR_OK
-	box.add_child(_line(secondary, color))
+	lines.append([secondary, color, 16])
+	return lines
 
 
 # --- Eventos -------------------------------------------------------------------

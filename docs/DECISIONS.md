@@ -50,7 +50,7 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
 
 ### D009: Regras da MISSÃO 001 (2026-11-11, provisória)
 - **Foco controlado:** todos os invasores que nasceram no foco foram eliminados e há uma unidade do jogador dentro da área. Uma vez controlado, o foco não volta a ficar ativo.
-- **Dano tecidual:** cada invasor vivo soma uma taxa por segundo (comum 0,2%/s, encapsulada 0,35%/s). Chegar a 100% é derrota, e passar de 50% falha o objetivo secundário. Representa o limite de dano tecidual do GDD.
+- **Dano tecidual:** cada invasor vivo soma uma taxa por segundo (comum 0,2%/s, encapsulada 0,35%/s). Chegar a 100% é derrota, e passar do limite secundário (50% na versão inicial, 35% depois da D012) falha o objetivo secundário. Representa o limite de dano tecidual do GDD.
 - **Derrota também** quando todas as unidades do jogador caem.
 - **Motivo:** o GDD pede "controlar todos os focos" e "ultrapassar o limite de dano tecidual". A taxa por invasor cria pressão de tempo sem precisar ainda da reprodução bacteriana.
 
@@ -58,6 +58,16 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
 - **Decisão:** a bactéria encapsulada bloqueia 60% do dano de atacantes comuns. Atacantes ativados pela SINALIZAÇÃO POR CITOCINAS ignoram a cápsula.
 - **Motivo:** o GDD exige que a resistência seja um mecanismo biológico, e não só mais vida. A cápsula polissacarídica dificulta a fagocitose, e fagócitos ativados por citocinas são mais eficazes contra ela. Isso também dá um uso tático para a habilidade do Macrophage.
 - **Simplificação:** na biologia real, a principal resposta à cápsula é a opsonização (anticorpos e complemento), que entra quando existirem as unidades adaptativas (B CELL).
+
+### D011: Polimento provisório sobre os corpos de cápsula (2026-11-11)
+- **Decisão:** animações procedurais e sons sintetizados, sem arte nem áudio de terceiros. As animações ficam em `unit_visuals.gd` e os sons são gerados por `tools/generate_sfx.py`.
+- **Motivo:** o protótipo precisa de retorno visual e sonoro para ser jogável e testável. Os modelos 3D com rig (D001) e os sons definitivos ainda não existem.
+- **Troca futura:** quando chegarem os modelos, o `UnitVisuals` é substituído pelo `AnimationPlayer` deles, sem mexer na `Unit`. Os sons definitivos entram com os mesmos nomes de arquivo.
+
+### D012: Balanceamento da MISSÃO 001 por simulação (2026-11-11, provisória)
+- **Decisão:** bactéria comum com dano 5 e objetivo secundário de 35% de dano tecidual. NEUTROPHIL continua com 100 de vida.
+- **Motivo:** com 120 de vida, a jogada sem pensar (sem citocinas contra a encapsulada) ficava quase igual à boa. Com dano 6, até a melhor jogada perdia 1 a 2 de 4 unidades, o que é duro para a primeira missão. O limite de 50% era cumprido por qualquer estratégia.
+- **Pendente:** validar com pessoas jogando.
 
 ## Em aberto
 

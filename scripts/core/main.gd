@@ -13,6 +13,7 @@ const FormationManagerScript := preload("res://scripts/formations/formation_mana
 const MissionControllerScript := preload("res://scripts/missions/mission_controller.gd")
 const MissionZonesScript := preload("res://scripts/interface/mission_zones.gd")
 const MissionHudScript := preload("res://scripts/interface/mission_hud.gd")
+const AudioManagerScript := preload("res://scripts/core/audio_manager.gd")
 
 const MAP_SIZE := 80.0
 ## Missão carregada ao abrir. Unidades, focos e condições vêm todos deste arquivo.
@@ -23,6 +24,7 @@ var _nav_region: NavigationRegion3D
 var _combat_fx: Node3D
 var _selection: SelectionController
 var _mission: MissionController
+var _audio: AudioManager
 var _obstacle_boxes: Array[AABB] = []
 
 
@@ -202,6 +204,9 @@ func _build_camera() -> void:
 
 
 func _build_mission() -> void:
+	_audio = AudioManagerScript.new() as AudioManager
+	_audio.name = "AudioManager"
+	add_child(_audio)
 	_combat_fx = CombatFxScript.new()
 	_combat_fx.name = "CombatFx"
 	add_child(_combat_fx)
@@ -214,6 +219,7 @@ func _build_mission() -> void:
 	zones.name = "MissionZones"
 	add_child(zones)
 	zones.build(_mission)
+	_audio.watch_mission(_mission)
 
 
 ## Cria uma unidade no mapa. Usada pela missão (e por testes).
@@ -223,6 +229,7 @@ func spawn_unit(unit_data: UnitData, pos: Vector3, team: Unit.Team) -> Unit:
 	unit.position = pos
 	add_child(unit)
 	_combat_fx.watch(unit)
+	_audio.watch_unit(unit)
 	return unit
 
 
@@ -234,6 +241,7 @@ func _build_selection() -> void:
 	_selection.name = "SelectionController"
 	_selection.formation_manager = formations
 	add_child(_selection)
+	_audio.watch_selection(_selection)
 
 
 func _build_hud() -> void:
@@ -248,7 +256,7 @@ func _build_hud() -> void:
 	layer.add_child(panel)
 
 	var title := Label.new()
-	title.text = "BIOWAR: FRONTLINE  |  Prototype 001  |  Etapa E: missão"
+	title.text = "BIOWAR: FRONTLINE  |  Prototype 001  |  Etapa F: polimento"
 	title.position = Vector2(16.0, 12.0)
 	layer.add_child(title)
 
@@ -257,7 +265,7 @@ func _build_hud() -> void:
 	layer.add_child(_fps_label)
 
 	var help := Label.new()
-	help.text = "Esq: selecionar (arrastar, Shift)  |  Dir: mover/atacar  |  Ctrl+1-9: criar grupo, 1-9: chamar (2x: câmera)  |  F1-F4: formação  |  Q/E: habilidades  |  WASD/Roda: câmera  |  F11  |  Esc"
+	help.text = "Esq: selecionar (arrastar, Shift)  |  Dir: mover/atacar  |  Ctrl+1-9: criar grupo, 1-9: chamar (2x: câmera)  |  F1-F4: formação  |  Q/E: habilidades  |  WASD/Roda: câmera  |  M: som  |  F11  |  Esc"
 	help.position = Vector2(16.0, 1040.0)
 	layer.add_child(help)
 

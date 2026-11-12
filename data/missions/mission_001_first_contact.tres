@@ -89,4 +89,4 @@ start_zone_radius = 7.0
 player_units = Array[ExtResource("2_spawn")]([SubResource("Spawn_p1"), SubResource("Spawn_p2"), SubResource("Spawn_p3"), SubResource("Spawn_p4")])
 foci = Array[ExtResource("3_focus")]([SubResource("Focus_alpha"), SubResource("Focus_bravo")])
 tissue_damage_limit = 100.0
-secondary_tissue_limit = 50.0
+secondary_tissue_limit = 35.0

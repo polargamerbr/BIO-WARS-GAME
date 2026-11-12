@@ -25,11 +25,13 @@ enum State { IDLE, MOVING, ATTACKING, DEFENDING, DEAD }
 const LAYER_WORLD := 1  ## Chão e obstáculos.
 const LAYER_UNITS := 2  ## Unidades, usada para escolher com o mouse.
 const GROUP := &"units"
+const UnitVisualsScript := preload("res://scripts/units/unit_visuals.gd")
 const SCAN_INTERVAL := 0.25  ## Segundos entre buscas de alvo, para não varrer todo quadro.
 const REPATH_INTERVAL := 0.3  ## Segundos entre recálculos da rota de perseguição.
 const LOSE_TARGET_FACTOR := 1.5  ## Alvo automático abandonado além de detecção x fator, medido da posição de formação.
 const HOLD_REACH_MARGIN := 0.5  ## Metros de folga no alcance de quem mantém posição.
 const HOME_TOLERANCE := 1.0  ## Metros. Mais longe que isso da posição de formação, a unidade volta.
+const MAX_SCAN_RESULTS := 48  ## Limite de unidades devolvidas pela consulta de detecção.
 
 var data: UnitData
 var team: Team = Team.PLAYER
@@ -52,6 +54,7 @@ var _cooldowns := {}  ## id da habilidade -> segundos restantes.
 var _effects := {}  ## AbilityData.Effect -> {"magnitude": float, "remaining": float}
 var _agent: NavigationAgent3D
 var _ring: MeshInstance3D
+var _scan_query: PhysicsShapeQueryParameters3D
 
 
 ## Deve ser chamada antes de add_child.
@@ -67,6 +70,9 @@ func _ready() -> void:
 	collision_mask = LAYER_WORLD
 	motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
 	home_position = global_position
+	# Defasa a primeira busca para as unidades não procurarem alvo todas no mesmo quadro.
+	_scan_timer = randf() * SCAN_INTERVAL
+	_build_scan_query()
 	_build_body()
 	_build_selection_ring()
 	_build_agent()
@@ -343,21 +349,23 @@ func _resting_state() -> State:
 
 
 func _find_target() -> Unit:
-	var best: Unit = null
-	var best_dist := INF
+	# Pede à física só as unidades dentro do raio de detecção, em vez de varrer todas.
+	_scan_query.transform = Transform3D(Basis.IDENTITY, global_position)
+	var hits := get_world_3d().direct_space_state.intersect_shape(_scan_query, MAX_SCAN_RESULTS)
+	var candidates: Array[Unit] = []
+	for hit in hits:
+		var other := hit["collider"] as Unit
+		if other != null and _is_valid_target(other) and _within_reach(other):
+			candidates.append(other)
+	if candidates.is_empty():
+		return null
+	# Linha de visão só a partir do mais próximo: normalmente basta um raio.
+	candidates.sort_custom(func(a: Unit, b: Unit): return _flat_distance(a) < _flat_distance(b))
 	var eye := get_center()
-	for node in get_tree().get_nodes_in_group(GROUP):
-		var other := node as Unit
-		if not _is_valid_target(other) or not _within_reach(other):
-			continue
-		var dist := _flat_distance(other)
-		if dist >= best_dist:
-			continue
-		if not line_is_clear(eye, other.get_center()):
-			continue
-		best = other
-		best_dist = dist
-	return best
+	for other in candidates:
+		if line_is_clear(eye, other.get_center()):
+			return other
+	return null
 
 
 ## Quem mantém posição só alcança o que está no alcance de ataque. Os demais, o que detectam.
@@ -445,7 +453,30 @@ func _on_velocity_computed(safe_velocity: Vector3) -> void:
 
 # --- Montagem -----------------------------------------------------------------
 
+func _build_scan_query() -> void:
+	var sphere := SphereShape3D.new()
+	sphere.radius = data.detection_range + 1.0  # Folga para o raio dos corpos.
+	_scan_query = PhysicsShapeQueryParameters3D.new()
+	_scan_query.shape = sphere
+	_scan_query.collision_mask = LAYER_UNITS
+	_scan_query.exclude = [get_rid()]
+
+
 func _build_body() -> void:
+	var shape := CapsuleShape3D.new()
+	shape.radius = data.body_radius
+	shape.height = data.body_height
+	var collider := CollisionShape3D.new()
+	collider.shape = shape
+	collider.position = Vector3.UP * data.center_height()
+	if data.body_shape == UnitData.BodyShape.ROD:
+		collider.rotation_degrees.x = 90.0  # Bastonete deitado ao longo do eixo de frente (-Z).
+	add_child(collider)
+
+	# As malhas ficam num pivô próprio, animado pelo UnitVisuals sem mexer na colisão.
+	var pivot := Node3D.new()
+	pivot.name = "Visual"
+	add_child(pivot)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = data.body_color
 	mat.roughness = 0.8
@@ -455,21 +486,10 @@ func _build_body() -> void:
 	capsule.material = mat
 	var body := MeshInstance3D.new()
 	body.mesh = capsule
-	var shape := CapsuleShape3D.new()
-	shape.radius = data.body_radius
-	shape.height = data.body_height
-	var collider := CollisionShape3D.new()
-	collider.shape = shape
-
-	var center := Vector3.UP * data.center_height()
-	body.position = center
-	collider.position = center
+	body.position = Vector3.UP * data.center_height()
 	if data.body_shape == UnitData.BodyShape.ROD:
-		# Bastonete deitado ao longo do eixo de frente (-Z).
 		body.rotation_degrees.x = 90.0
-		collider.rotation_degrees.x = 90.0
-	add_child(collider)
-	add_child(body)
+	pivot.add_child(body)
 
 	if data.body_shape == UnitData.BodyShape.UPRIGHT:
 		# Visor azul no lado da frente (-Z), para ver para onde o soldado está virado.
@@ -483,7 +503,12 @@ func _build_body() -> void:
 		var visor := MeshInstance3D.new()
 		visor.mesh = visor_mesh
 		visor.position = Vector3(0.0, data.body_height * 0.78, -data.body_radius * 0.85)
-		add_child(visor)
+		pivot.add_child(visor)
+
+	var visuals := UnitVisualsScript.new()
+	visuals.name = "Visuals"
+	add_child(visuals)
+	visuals.setup(self, pivot, mat)
 
 
 func _build_selection_ring() -> void:

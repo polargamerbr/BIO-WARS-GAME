@@ -10,6 +10,36 @@ const COLOR_ENEMY := Color(0.85, 0.9, 0.3, 0.9)
 func watch(unit: Unit) -> void:
 	unit.attack_performed.connect(_on_attack_performed)
 	unit.ability_used.connect(_on_ability_used)
+	unit.died.connect(_on_died)
+
+
+## Estouro de fragmentos na cor do corpo quando a unidade é eliminada.
+func _on_died(unit: Unit) -> void:
+	var particles := CPUParticles3D.new()
+	particles.one_shot = true
+	particles.emitting = false
+	particles.amount = 18
+	particles.lifetime = 0.7
+	particles.explosiveness = 1.0
+	particles.direction = Vector3.UP
+	particles.spread = 70.0
+	particles.initial_velocity_min = 2.0
+	particles.initial_velocity_max = 4.5
+	particles.gravity = Vector3(0.0, -9.0, 0.0)
+	particles.scale_amount_min = 0.6
+	particles.scale_amount_max = 1.2
+	var mesh := SphereMesh.new()
+	mesh.radius = 0.08
+	mesh.height = 0.16
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = unit.data.body_color
+	mesh.material = mat
+	particles.mesh = mesh
+	add_child(particles)
+	particles.global_position = unit.get_center()
+	particles.emitting = true
+	get_tree().create_timer(particles.lifetime + 0.2).timeout.connect(particles.queue_free)
 
 
 ## Anel que se expande até o raio da habilidade (ou em volta da unidade, se for só nela).

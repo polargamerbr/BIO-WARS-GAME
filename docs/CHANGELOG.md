@@ -1,5 +1,47 @@
 # CHANGELOG
 
+## [0.1.0] Etapa F, polimento (2026-11-11)
+
+### Adicionado
+- Animações procedurais (`scripts/units/unit_visuals.gd`), separadas da lógica:
+  - Soldados balançam e inclinam ao andar e respiram parados.
+  - Bactérias ondulam ao andar e pulsam paradas.
+  - O atacante avança rápido a cada golpe e quem recebe dano dá um clarão branco.
+  - As malhas ficam num pivô próprio, sem mexer na colisão.
+- Estouro de fragmentos na cor do corpo quando uma unidade é eliminada.
+- Sons: 13 efeitos sintetizados por `tools/generate_sfx.py`, sem arquivos de terceiros, em `assets/audio/sfx/`.
+  - Cobrem seleção, ordens de mover e atacar, golpes, mortes, as duas habilidades, foco controlado, alerta, vitória e derrota.
+  - `AudioManager` com 12 players, limite de repetição por som e pequena variação de tom. A tecla M liga e desliga o som.
+- `export_presets.cfg` com o preset "Windows Desktop": gera `build/windows/BIOWAR_FRONTLINE.exe` com os dados embutidos. Ficam de fora docs, ferramentas, o plugin Tripo e as artes de referência. O arquivo agora é versionado (não tem credenciais).
+
+### Alterado
+- Otimização da busca de alvo. Antes, cada unidade varria todas as outras, e todas faziam isso no mesmo quadro. Agora há uma consulta de esfera da física só no raio de detecção, os relógios de busca são defasados por unidade e a linha de visão é testada a partir do candidato mais próximo.
+- O painel de objetivos atualiza os textos existentes em vez de recriá-los 10 vezes por segundo.
+- Balanceamento:
+  - Dano da bactéria comum de 6 para 5.
+  - Objetivo secundário da MISSÃO 001: dano tecidual abaixo de 35% (era 50%).
+
+### Testado
+- Teste de carga com 310 unidades. O tempo de física com todas paradas caiu de 60 ms de média (pico de 108 ms) para 8,5 ms (pico de 10 ms). Em combate, caiu de 18 ms para 12 ms. O FPS ficou no teto da tela (100), com mínimo de 75 ao criar as 300 unidades.
+- Simulação de balanceamento, 3 partidas por estratégia, em velocidade 3x:
+  - BRAVO e depois ALFA com citocinas: vitória em ~24 s, ~24% de dano tecidual, 1 perda.
+  - O mesmo com aproximação em COMPACTA: vitória em ~28 s, ~28%, 1 perda.
+  - Todos direto na encapsulada sem habilidade: vitória em ~31 s, ~29%, 1 a 2 perdas.
+  - Sem fazer nada: derrota em 74 s.
+- Os testes de missão e das Etapas B, C e D continuam passando. O jogo abre em modo headless sem erros.
+- O teste de seleção da Etapa B falhou em 2 de 8 rodadas com janela e passou em 4 de 4 sem janela. A causa provável é o mouse real passando sobre a janela do teste e misturando movimentos aos cliques simulados.
+- Executável do Windows (critério 8 do protótipo): `build/windows/BIOWAR_FRONTLINE.exe` (104 MB, dados embutidos), gerado pelo preset "Windows Desktop". Copiado para uma pasta fora do projeto, abriu com Vulkan, rodou 400 quadros e fechou sem erros. A gravação de quadros mostra a ordem de missão correta sobre o mapa.
+
+### Não testado
+- Uma partida completa jogada dentro do executável (só foi verificada a abertura).
+- Os sons e as animações não foram ouvidos nem vistos em movimento por uma pessoa. O áudio rodou com o driver falso dos testes.
+- Mouse e teclado reais.
+
+### Problemas conhecidos
+- O balanceamento foi feito com jogadas automatizadas, que reagem na hora. Precisa ser revisto com jogadores.
+- Mesmo a melhor estratégia testada perde uma unidade na MISSÃO 001.
+
+
 ## [0.0.5] Etapa E, missão (2026-11-11)
 
 ### Adicionado
