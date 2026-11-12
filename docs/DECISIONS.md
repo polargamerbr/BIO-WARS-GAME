@@ -25,7 +25,7 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
 - **Decisão:** vida, velocidade e tamanho do corpo vêm de `data/units/*.tres`. Atributos de combate (alcance, dano, tempo de ataque) entram na Etapa C, quando existirem usuários deles.
 - **Valores atuais:** provisórios, como os da prancha do Neutrophil.
 
-### D005: Combate de curto alcance no protótipo (2026-11-10, provisória)
+### D005: Combate de curto alcance no protótipo (2026-11-10, substituída pela D013)
 - **Decisão:** NEUTROPHIL e MACROPHAGE atacam a 2 m (entre as bordas dos corpos), a bactéria a 1,5 m. O ataque é instantâneo, sem projétil.
 - **Motivo:** o GDD descreve as duas unidades com fagocitose e combate direto. Isso deixa de lado o fuzil da arte de referência até a pendência "Alcance dos soldados" ser decidida.
 - **Reversível:** sim. O alcance é só um valor nos arquivos `.tres`. Um ataque à distância de verdade exigiria projéteis, que ainda não existem.
@@ -69,9 +69,22 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
 - **Motivo:** com 120 de vida, a jogada sem pensar (sem citocinas contra a encapsulada) ficava quase igual à boa. Com dano 6, até a melhor jogada perdia 1 a 2 de 4 unidades, o que é duro para a primeira missão. O limite de 50% era cumprido por qualquer estratégia.
 - **Pendente:** validar com pessoas jogando.
 
+### D013: Soldados com fuzil (2026-11-11)
+- **Decisão (do diretor do projeto):** NEUTROPHIL e MACROPHAGE atacam à distância, com fuzil. Isso resolve a pendência "Alcance dos soldados" e substitui a D005.
+  - NEUTROPHIL: alcance de 7 m, detecção de 11 m.
+  - MACROPHAGE: arma pesada, com alcance de 5 m, mais dano por tiro e cadência menor.
+  - O tiro é um projétil a 40 m/s que aplica o dano ao chegar e some se o alvo morrer antes.
+- **Inimigos:** as bactérias continuam atacando por contato.
+- **Coerência com o GDD:** segue a arte de referência do Neutrophil, que carrega fuzil. O fuzil é a representação militar da ação da célula de defesa (D001 e GDD 4: "nomenclatura militar é representação de gameplay"). A cápsula da bactéria encapsulada continua reduzindo esse dano, como representação da resistência à fagocitose.
+- **Fagocitose:** fica para uma habilidade ou efeito futuro. Não é o ataque básico.
+- **Balanceamento (simulação, 3 partidas por estratégia):**
+  - Boa jogada: ~21 s, ~21% de dano tecidual, 0 perdas (1 em uma rodada).
+  - Compacta: ~24 s, 0 perdas.
+  - Ingênua: ~27 s, ~26%, 1 perda.
+  - Os valores da D012 foram mantidos.
+
 ## Em aberto
 
 - **Recurso do jogador:** o GDD fala em "recursos iniciais" sem definir o que são. Ideia em avaliação: sinais inflamatórios para chamar reforços.
-- **Alcance dos soldados:** o GDD usa fuzil, o que conflita com fagocitose (combate próximo). A decidir.
 - **Formato de dados:** o plano cita Resources e JSON. A decidir se fica só Resources (`.tres`).
 - **Estatísticas da prancha do Neutrophil** (custo, tempo de produção, cura): são placeholder, não valem como regra.

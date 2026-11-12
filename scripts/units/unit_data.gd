@@ -18,6 +18,8 @@ enum BodyShape { UPRIGHT, ROD }  ## UPRIGHT: soldado em pé. ROD: bastonete deit
 @export var attack_cooldown: float = 1.0  ## Segundos entre ataques.
 @export var attack_range: float = 1.5  ## Metros entre as bordas dos dois corpos.
 @export var detection_range: float = 8.0  ## Metros. Até onde a unidade parada percebe inimigos.
+## Metros por segundo do projétil. 0 = ataque de contato (dano na hora, sem projétil).
+@export var projectile_speed: float = 0.0
 
 @export_group("Biologia")
 ## Fração do dano bloqueada por uma cápsula (0 = sem cápsula). A cápsula dificulta a fagocitose;
@@ -34,6 +36,10 @@ enum BodyShape { UPRIGHT, ROD }  ## UPRIGHT: soldado em pé. ROD: bastonete deit
 @export var body_radius: float = 0.5  ## Metros. Também é o raio do agente de navegação.
 @export var body_height: float = 1.8  ## Metros. No bastonete, é o comprimento.
 @export var body_color: Color = Color(0.5, 0.5, 0.5)
+
+
+func is_ranged() -> bool:
+	return projectile_speed > 0.0
 
 
 ## Altura do centro do corpo acima do chão.

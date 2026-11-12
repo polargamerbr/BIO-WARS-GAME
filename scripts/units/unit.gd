@@ -6,6 +6,7 @@ extends CharacterBody3D
 ##   MOVING: cumprindo ordem de movimento. Ignora inimigos até chegar, exceto quando está
 ##           voltando para a sua posição de formação depois de um combate.
 ##   ATTACKING: persegue o alvo pela navegação e ataca quando está no alcance e com visão.
+##              Com fuzil (projectile_speed > 0) dispara um projétil; sem, o dano é de contato.
 ##   DEFENDING: parada numa formação que mantém posição. Só ataca o que entra no alcance.
 ##   DEAD: incapacitada.
 ## Posição de formação (home_position): o ponto da última ordem de movimento, ou onde nasceu.
@@ -26,6 +27,9 @@ const LAYER_WORLD := 1  ## Chão e obstáculos.
 const LAYER_UNITS := 2  ## Unidades, usada para escolher com o mouse.
 const GROUP := &"units"
 const UnitVisualsScript := preload("res://scripts/units/unit_visuals.gd")
+const ProjectileScript := preload("res://scripts/combat/projectile.gd")
+const PROJECTILE_COLOR_PLAYER := Color(1.0, 0.85, 0.45)
+const PROJECTILE_COLOR_ENEMY := Color(0.85, 0.9, 0.3)
 const SCAN_INTERVAL := 0.25  ## Segundos entre buscas de alvo, para não varrer todo quadro.
 const REPATH_INTERVAL := 0.3  ## Segundos entre recálculos da rota de perseguição.
 const LOSE_TARGET_FACTOR := 1.5  ## Alvo automático abandonado além de detecção x fator, medido da posição de formação.
@@ -283,8 +287,7 @@ func _process_attacking(delta: float) -> void:
 		_face(target.global_position - global_position)
 		if _attack_timer <= 0.0:
 			_attack_timer = data.attack_cooldown
-			target.take_damage(current_damage(), self)
-			attack_performed.emit(self, target)
+			_perform_attack(target)
 		return
 
 	# Fora do alcance ou sem visão: persegue.
@@ -317,6 +320,20 @@ func _arrive() -> void:
 	_halt()
 	if _arrival_facing != Vector3.ZERO:
 		rotation.y = atan2(-_arrival_facing.x, -_arrival_facing.z)
+
+
+## Ataque de contato aplica o dano na hora. Ataque à distância dispara um projétil, que aplica
+## o dano ao chegar (o efeito de ativação do atirador é avaliado no impacto).
+func _perform_attack(enemy: Unit) -> void:
+	if data.is_ranged():
+		var shot := ProjectileScript.new()
+		var muzzle := get_center() + (enemy.get_center() - get_center()).normalized() * (data.body_radius + 0.2)
+		var color := PROJECTILE_COLOR_PLAYER if team == Team.PLAYER else PROJECTILE_COLOR_ENEMY
+		shot.setup(self, enemy, current_damage(), data.projectile_speed, muzzle, color)
+		get_parent().add_child(shot)
+	else:
+		enemy.take_damage(current_damage(), self)
+	attack_performed.emit(self, enemy)
 
 
 func _engage(enemy: Unit, ordered: bool) -> void:

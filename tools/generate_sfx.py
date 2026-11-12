@@ -120,6 +120,10 @@ def main():
     notes_down = [392, 349, 311, 262]
     write("defeat", concat(*[tone(f, f * 0.98, 0.25, "tri") for f in notes_down[:-1]], tone(262, 240, 0.8, "tri")), peak=0.6)
 
+    # Fuzil (D013). Gerado por último para não mudar o sorteio do ruído dos sons anteriores.
+    shot = mix(noise(0.12, smoothing=0.3, volume=0.9, attack=0.001, release=0.11), tone(140, 60, 0.12, "sine", volume=0.7, attack=0.001))
+    write("rifle_shot", shot, peak=0.55)
+
 
 if __name__ == "__main__":
     main()

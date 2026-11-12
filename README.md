@@ -14,7 +14,7 @@ Documentação em `docs/`: `GDD.md`, `TECHNICAL_PLAN.md`, `DECISIONS.md`, `CHANG
 
 A MISSÃO 001 — PRIMEIRO CONTATO, jogável do começo ao fim. O jogo abre na ordem de missão (Enter para começar).
 
-- 3 NEUTROPHIL e 1 MACROPHAGE (corpos provisórios) partem da área verde.
+- 3 NEUTROPHIL e 1 MACROPHAGE (corpos provisórios), armados com fuzil, partem da área verde.
 - Dois focos de invasão: BRAVO (2 bactérias comuns) e ALFA (3 comuns e 1 encapsulada, cuja cápsula bloqueia boa parte do dano).
 - Vitória: controlar os dois focos (eliminar os invasores e ocupar a área).
 - Derrota: o dano tecidual, que cresce enquanto há invasores vivos, chega a 100%, ou todas as unidades caem.

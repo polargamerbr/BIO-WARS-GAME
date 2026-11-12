@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## [0.1.1] Soldados com fuzil (2026-11-11)
+
+### Adicionado
+- `scripts/combat/projectile.gd`: projétil com traço luminoso que voa até o alvo, aplica o dano ao chegar e mostra um clarão no impacto. Some se o alvo morrer antes.
+- Campo `projectile_speed` no `UnitData` (0 = ataque de contato).
+- Disparo com clarão na boca do cano, recuo do corpo e som de tiro (`rifle_shot.wav`, gerado por último no script, para não alterar os outros sons).
+
+### Alterado
+- NEUTROPHIL: alcance de 7 m e detecção de 11 m. MACROPHAGE: alcance de 5 m e detecção de 10 m. Os dois disparam projéteis a 40 m/s (D013).
+- As bactérias continuam com ataque de contato e o golpe com avanço.
+
+### Testado
+- Simulação de balanceamento:
+  - Boa jogada: vitória em ~21 s, ~21% de dano tecidual, 0 perdas.
+  - Compacta: ~24 s, 0 perdas.
+  - Ingênua: ~27 s, ~26%, 1 perda.
+- Testes de missão, combate, estratégia e seleção. A seleção foi testada sem janela, por causa da interferência do mouse real.
+- Os testes da Etapa D usavam inimigos a 7,5 m e 8 m, distâncias pensadas para o corpo a corpo, e passaram a usar 10 m e 10,8 m.
+
+### Não testado
+- Executável gerado de novo e aberto fora do projeto (300 quadros, sem erros). Uma partida completa dentro dele não foi jogada.
+
+
 ## [0.1.0] Etapa F, polimento (2026-11-11)
 
 ### Adicionado

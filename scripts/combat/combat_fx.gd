@@ -62,6 +62,12 @@ func _on_attack_performed(attacker: Unit, target: Unit) -> void:
 	var color := COLOR_PLAYER if attacker.team == Unit.Team.PLAYER else COLOR_ENEMY
 	var from := attacker.get_center()
 	var to := target.get_center()
+	if attacker.data.is_ranged():
+		# O projétil desenha o próprio voo e impacto; aqui só o clarão do disparo.
+		var muzzle := from + (to - from).normalized() * (attacker.data.body_radius + 0.2)
+		var flash := _spawn_flash(muzzle, Color(1.0, 0.9, 0.6, 0.9))
+		flash.scale = Vector3.ONE * 0.6
+		return
 	_spawn_streak(from, to, color)
 	_spawn_flash(to, color)
 
@@ -78,12 +84,13 @@ func _spawn_streak(from: Vector3, to: Vector3, color: Color) -> void:
 	piece.look_at(to, up)
 
 
-func _spawn_flash(at: Vector3, color: Color) -> void:
+func _spawn_flash(at: Vector3, color: Color) -> MeshInstance3D:
 	var mesh := SphereMesh.new()
 	mesh.radius = 0.25
 	mesh.height = 0.5
 	var piece := _spawn_fading(mesh, color)
 	piece.global_position = at
+	return piece
 
 
 func _spawn_fading(mesh: PrimitiveMesh, color: Color, duration: float = DURATION) -> MeshInstance3D:

@@ -4,12 +4,13 @@ extends Node
 ## 3D com rig, isto é substituído pelas animações deles.
 ##   Soldado em pé: balança ao andar, inclina para a frente, respira parado.
 ##   Bastonete (bactéria): ondula ao andar e pulsa parado.
-##   Ataque: avanço rápido para a frente. Dano recebido: clarão branco.
+##   Ataque: avanço rápido para a frente (contato) ou recuo do disparo (fuzil). Dano recebido: clarão branco.
 
 const WALK_BOB := 0.08  ## Metros de balanço vertical ao andar.
 const WALK_STEP_RATE := 2.2  ## Passos por segundo a cada m/s de velocidade (com limite).
 const LEAN_DEGREES := 7.0  ## Inclinação para a frente na velocidade máxima.
 const LUNGE_DISTANCE := 0.35
+const RECOIL_DISTANCE := 0.12
 const FLASH_ENERGY := 2.5
 const FLASH_TIME := 0.15
 
@@ -77,8 +78,10 @@ func _animate_rod(t: float, moving: bool, speed: float) -> void:
 
 
 func _on_attack_performed(_attacker: Unit, _target: Unit) -> void:
+	# Com fuzil, o corpo recua com o disparo; no contato, avança contra o alvo.
+	var offset := -RECOIL_DISTANCE if _unit.data.is_ranged() else LUNGE_DISTANCE
 	var tween := create_tween()
-	tween.tween_property(self, "_lunge", LUNGE_DISTANCE, 0.07)
+	tween.tween_property(self, "_lunge", offset, 0.05)
 	tween.tween_property(self, "_lunge", 0.0, 0.15)
 
 

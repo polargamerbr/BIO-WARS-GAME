@@ -15,6 +15,7 @@ const SOUNDS := {
 	"order_move": [-8.0, 0.05],
 	"order_attack": [-8.0, 0.05],
 	"attack_player": [-14.0, 0.07],
+	"rifle_shot": [-15.0, 0.06],
 	"attack_enemy": [-16.0, 0.07],
 	"death_enemy": [-6.0, 0.05],
 	"death_player": [-4.0, 0.05],
@@ -64,7 +65,10 @@ func play(sound_name: String, vary_pitch: bool = true) -> void:
 
 func watch_unit(unit: Unit) -> void:
 	unit.attack_performed.connect(func(attacker: Unit, _t: Unit):
-		play("attack_player" if attacker.team == Unit.Team.PLAYER else "attack_enemy"))
+		if attacker.data.is_ranged():
+			play("rifle_shot")
+		else:
+			play("attack_player" if attacker.team == Unit.Team.PLAYER else "attack_enemy"))
 	unit.died.connect(func(dead: Unit):
 		play("death_player" if dead.team == Unit.Team.PLAYER else "death_enemy"))
 	unit.ability_used.connect(func(_u: Unit, ability: AbilityData):
