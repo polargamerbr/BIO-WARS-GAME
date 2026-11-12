@@ -124,6 +124,11 @@ def main():
     shot = mix(noise(0.12, smoothing=0.3, volume=0.9, attack=0.001, release=0.11), tone(140, 60, 0.12, "sine", volume=0.7, attack=0.001))
     write("rifle_shot", shot, peak=0.55)
 
+    # Escudo de bioenergia (D015). Também no fim, pelo mesmo motivo.
+    zap = mix(tone(900, 1500, 0.14, "sine", volume=0.5, attack=0.002), noise(0.14, smoothing=0.2, volume=0.25, attack=0.002))
+    write("shield_hit", zap, peak=0.45)
+    write("shield_break", mix(tone(1200, 200, 0.35, "tri", volume=0.6), noise(0.35, smoothing=0.5, volume=0.4)), peak=0.55)
+
 
 if __name__ == "__main__":
     main()

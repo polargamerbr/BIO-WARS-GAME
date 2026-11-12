@@ -4,6 +4,8 @@ extends Node
 ## 3D com rig, isto é substituído pelas animações deles.
 ##   Soldado em pé: balança ao andar, inclina para a frente, respira parado.
 ##   Bastonete (bactéria): ondula ao andar e pulsa parado.
+##   Criatura (invasor humanoide): curvada, passo rápido e balanço inquieto parada.
+##   Escudo de bioenergia: painel translúcido à frente; some quando zera, pisca ao absorver.
 ##   Ataque: avanço rápido para a frente (contato) ou recuo do disparo (fuzil). Dano recebido: clarão branco.
 
 const WALK_BOB := 0.08  ## Metros de balanço vertical ao andar.
@@ -13,12 +15,16 @@ const LUNGE_DISTANCE := 0.35
 const RECOIL_DISTANCE := 0.12
 const FLASH_ENERGY := 2.5
 const FLASH_TIME := 0.15
+const SHIELD_COLOR := Color(0.35, 0.85, 1.0)
+const SHIELD_ALPHA := 0.35
 
 var _unit: Unit
 var _pivot: Node3D
 var _material: StandardMaterial3D
 var _time := 0.0
 var _lunge := 0.0
+var _shield_panel: MeshInstance3D
+var _shield_mat: StandardMaterial3D
 var _phase := 0.0  ## Defasagem aleatória para as unidades não se moverem em sincronia.
 
 
@@ -32,6 +38,9 @@ func setup(unit: Unit, pivot: Node3D, material: StandardMaterial3D) -> void:
 	_phase = randf() * TAU
 	unit.attack_performed.connect(_on_attack_performed)
 	unit.damaged.connect(_on_damaged)
+	if unit.data.has_shield():
+		_build_shield_panel()
+		unit.shield_hit.connect(_on_shield_hit)
 
 
 func _process(delta: float) -> void:
@@ -43,10 +52,15 @@ func _process(delta: float) -> void:
 	var speed_ratio := clampf(speed / maxf(_unit.data.move_speed, 0.1), 0.0, 1.5)
 	var t := _time + _phase
 
-	if _unit.data.body_shape == UnitData.BodyShape.ROD:
-		_animate_rod(t, moving, speed)
-	else:
-		_animate_upright(t, moving, speed, speed_ratio)
+	match _unit.data.body_shape:
+		UnitData.BodyShape.ROD:
+			_animate_rod(t, moving, speed)
+		UnitData.BodyShape.CREATURE:
+			_animate_creature(t, moving, speed, speed_ratio)
+		_:
+			_animate_upright(t, moving, speed, speed_ratio)
+	if _shield_panel != null:
+		_update_shield_panel(t)
 
 
 func _animate_upright(t: float, moving: bool, speed: float, speed_ratio: float) -> void:
@@ -62,6 +76,63 @@ func _animate_upright(t: float, moving: bool, speed: float, speed_ratio: float) 
 	_pivot.position = Vector3(0.0, bob, -_lunge)
 	_pivot.rotation.x = lerp_angle(_pivot.rotation.x, lean, 0.2)
 	_pivot.scale = Vector3(1.0, breathe, 1.0)
+
+
+func _animate_creature(t: float, moving: bool, speed: float, speed_ratio: float) -> void:
+	var bob := 0.0
+	var lean := 0.0
+	var sway := 0.0
+	if moving:
+		var rate := minf(speed * 3.2, 16.0)  # Passo mais rápido e nervoso que o do soldado.
+		bob = absf(sin(t * rate)) * WALK_BOB * 1.4
+		lean = -deg_to_rad(14.0) * speed_ratio
+		sway = sin(t * rate * 0.5) * deg_to_rad(6.0)
+	else:
+		sway = sin(t * 1.7) * deg_to_rad(4.0)  # Balanço inquieto, de predador parado.
+		bob = sin(t * 2.6) * 0.03
+	_pivot.position = Vector3(0.0, bob, -_lunge)
+	_pivot.rotation.x = lerp_angle(_pivot.rotation.x, lean, 0.2)
+	_pivot.rotation.z = sway
+
+
+func _build_shield_panel() -> void:
+	var r := _unit.data.body_radius
+	var h := _unit.data.body_height
+	_shield_mat = StandardMaterial3D.new()
+	_shield_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_shield_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_shield_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_shield_mat.albedo_color = Color(SHIELD_COLOR, SHIELD_ALPHA)
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(r * 2.4, h * 0.85, 0.05)
+	mesh.material = _shield_mat
+	_shield_panel = MeshInstance3D.new()
+	_shield_panel.name = "ShieldPanel"
+	_shield_panel.mesh = mesh
+	_shield_panel.position = Vector3(0.0, h * 0.5, -r - 0.35)
+	_shield_panel.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_pivot.add_child(_shield_panel)
+
+
+func _update_shield_panel(t: float) -> void:
+	var ratio := _unit.shield / _unit.data.shield_max
+	_shield_panel.visible = ratio > 0.0
+	if ratio <= 0.0:
+		return
+	# Mais forte com o escudo cheio, com uma pulsação leve de energia.
+	var target_alpha := SHIELD_ALPHA * (0.35 + 0.65 * ratio) * (0.9 + 0.1 * sin(t * 6.0))
+	_shield_mat.albedo_color.a = lerpf(_shield_mat.albedo_color.a, target_alpha, 0.2)
+
+
+func _on_shield_hit(_unit_hit: Unit, _absorbed: float, broken: bool) -> void:
+	_shield_mat.albedo_color = Color(Color.WHITE, 0.9)
+	var tween := create_tween()
+	tween.tween_property(_shield_mat, "albedo_color", Color(SHIELD_COLOR, SHIELD_ALPHA), 0.2)
+	if broken:
+		# Estoura: cresce e volta ao tamanho normal (fica invisível até recarregar).
+		_shield_panel.scale = Vector3.ONE * 1.3
+		var pop := create_tween()
+		pop.tween_property(_shield_panel, "scale", Vector3.ONE, 0.25)
 
 
 func _animate_rod(t: float, moving: bool, speed: float) -> void:

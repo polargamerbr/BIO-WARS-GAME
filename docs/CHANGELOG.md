@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## [0.2.0] Invasores humanoides e MACROPHAGE com escudo (2026-11-11)
+
+### Adicionado
+- Escudo de bioenergia no `UnitData` (`shield_max`, `shield_regen_delay`, `shield_regen_rate`). O escudo absorve dano antes da vida e recarrega depois de um tempo sem tomar dano. Novo sinal `shield_hit` na `Unit`.
+- Painel de energia translúcido à frente de quem tem escudo: pulsa, pisca ao absorver e estoura ao zerar.
+- Faixa ciano do escudo acima da barra de vida.
+- Sons `shield_hit` e `shield_break`, gerados no fim do script para não alterar os outros sons.
+- Corpo provisório `CREATURE` para os invasores: tronco curvado, cabeça sem rosto, pili nas costas e brilho de toxina no peito, com animação própria.
+- Casca translúcida da cápsula em volta da bactéria encapsulada (campo `capsule_color`).
+- `docs/ART_PROMPTS.md` com os prompts de arte para o Gemini, já com o novo MACROPHAGE e os invasores humanoides.
+
+### Alterado
+- MACROPHAGE: corpo a corpo (alcance de 1,5 m, dano 20, ataque a cada 1,2 s, detecção de 9 m), sem fuzil, com escudo de 120 pontos (D015).
+- Bactérias comum e encapsulada passam a usar o corpo `CREATURE` (D014). Os atributos de combate não mudaram.
+
+### Testado
+- Simulação de balanceamento: vitória nas três estratégias, com 0 a 1 perda. A boa jogada fica em ~22 s e ~22% de dano tecidual.
+- Testes de missão, combate, estratégia e seleção. O teste da formação defensiva agora confere que o escudo absorve o dano antes da vida e que recarrega depois de 4 s.
+
+### Não testado
+- O visual novo (criaturas, cápsula e painel de escudo) só foi visto em capturas do teste.
+- Executável gerado de novo e aberto fora do projeto (300 quadros, sem erros). Corrigido também: a unidade travava em erro de script se o alvo guardado já tivesse sido removido da cena.
+
+
 ## [0.1.1] Soldados com fuzil (2026-11-11)
 
 ### Adicionado

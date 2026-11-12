@@ -69,7 +69,7 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
 - **Motivo:** com 120 de vida, a jogada sem pensar (sem citocinas contra a encapsulada) ficava quase igual à boa. Com dano 6, até a melhor jogada perdia 1 a 2 de 4 unidades, o que é duro para a primeira missão. O limite de 50% era cumprido por qualquer estratégia.
 - **Pendente:** validar com pessoas jogando.
 
-### D013: Soldados com fuzil (2026-11-11)
+### D013: Soldados com fuzil (2026-11-11, MACROPHAGE revisto na D015)
 - **Decisão (do diretor do projeto):** NEUTROPHIL e MACROPHAGE atacam à distância, com fuzil. Isso resolve a pendência "Alcance dos soldados" e substitui a D005.
   - NEUTROPHIL: alcance de 7 m, detecção de 11 m.
   - MACROPHAGE: arma pesada, com alcance de 5 m, mais dano por tiro e cadência menor.
@@ -82,6 +82,23 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
   - Compacta: ~24 s, 0 perdas.
   - Ingênua: ~27 s, ~26%, 1 perda.
   - Os valores da D012 foram mantidos.
+
+### D014: Invasores humanoides com aspectos de bactéria (2026-11-11)
+- **Decisão (do diretor do projeto):** as bactérias deixam de ser bastonetes e viram criaturas humanoides. Continuam lendo como bactéria:
+  - Corpo de segmentos em bastonete fundidos e pele de membrana celular.
+  - Placas de parede celular, pili e glândulas de toxina.
+  - Sem olhos.
+- **Inspiração:** o "enxame alienígena predador" da ficção científica (tipo Zerg ou Xenomorfo), **sem copiar**. O design é original e os prompts proíbem os traços marcantes dessas criaturas.
+- **No protótipo:** o corpo provisório `CREATURE` tem tronco curvado, cabeça sem rosto, espinhos (pili) e brilho de toxina no peito, com animação de passo nervoso e balanço de predador. A bactéria encapsulada ganha uma casca translúcida creme em volta do corpo, que é a cápsula visível.
+- **Mantido:** GDD 2.1 (nada cartunesco) e a regra de não confundir vírus com bactéria.
+
+### D015: MACROPHAGE como tropa física com escudo de bioenergia (2026-11-11)
+- **Decisão (do diretor do projeto):** o MACROPHAGE larga a arma pesada e passa a lutar corpo a corpo (alcance de 1,5 m), com um escudo de bioenergia. Substitui a parte da D013 sobre o MACROPHAGE. O NEUTROPHIL continua com fuzil.
+- **Escudo:** 120 pontos que absorvem dano antes da vida. Recarrega a 30 pontos/s depois de 4 s sem tomar dano. Os valores ficam no `UnitData` (`shield_max`, `shield_regen_delay`, `shield_regen_rate`).
+- **Visual:** painel de energia ciano translúcido à frente do corpo, faixa ciano acima da barra de vida e sons de impacto e de estouro do escudo.
+- **Coerência com o GDD:** o GDD 4.1 descreve o MACROPHAGE como unidade pesada, de grande resistência e com fagocitose. O combate de perto representa a fagocitose (engolir o invasor), e o escudo representa a resistência. O papel é de linha de frente.
+- **Balanceamento (simulação):** vitória em todas as estratégias, com 0 a 1 perda. A boa jogada fica em ~22 s e ~22% de dano tecidual.
+- **Pendente:** os invasores escolhem sempre o alvo mais próximo, então às vezes ignoram o MACROPHAGE e atacam os NEUTROPHILS. Uma habilidade de provocação faria dele um tanque de verdade.
 
 ## Em aberto
 

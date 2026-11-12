@@ -19,6 +19,8 @@ signal damaged(unit: Unit, amount: float)
 signal died(unit: Unit)
 signal attack_performed(attacker: Unit, target: Unit)
 signal ability_used(unit: Unit, ability: AbilityData)
+## O escudo absorveu dano. broken = o escudo acabou de zerar.
+signal shield_hit(unit: Unit, absorbed: float, broken: bool)
 
 enum Team { PLAYER, ENEMY }
 enum State { IDLE, MOVING, ATTACKING, DEFENDING, DEAD }
@@ -40,6 +42,7 @@ const MAX_SCAN_RESULTS := 48  ## Limite de unidades devolvidas pela consulta de 
 var data: UnitData
 var team: Team = Team.PLAYER
 var health: float = 0.0
+var shield: float = 0.0  ## Escudo de bioenergia atual (absorve dano antes da vida).
 var state: State = State.IDLE
 var target: Unit = null
 var formation: FormationData = null
@@ -52,6 +55,7 @@ var _returning := false  ## Voltando para a posição de formação depois de um
 var _speed_cap := INF  ## Limite de velocidade imposto pela formação durante o deslocamento.
 var _arrival_facing := Vector3.ZERO  ## Para onde virar ao chegar. Zero = não muda.
 var _attack_timer := 0.0
+var _since_damage := INF  ## Segundos desde o último dano recebido (para a recarga do escudo).
 var _scan_timer := 0.0
 var _repath_timer := 0.0
 var _cooldowns := {}  ## id da habilidade -> segundos restantes.
@@ -66,6 +70,7 @@ func setup(unit_data: UnitData, unit_team: Team = Team.PLAYER) -> void:
 	data = unit_data
 	team = unit_team
 	health = unit_data.max_health
+	shield = unit_data.shield_max
 
 
 func _ready() -> void:
@@ -226,8 +231,13 @@ func take_damage(amount: float, attacker: Unit = null) -> void:
 	if state == State.DEAD:
 		return
 	var final_amount := amount * damage_taken_multiplier() * _capsule_factor(attacker)
-	health = maxf(health - final_amount, 0.0)
+	_since_damage = 0.0
+	var absorbed := minf(shield, final_amount)
+	shield -= absorbed
+	health = maxf(health - (final_amount - absorbed), 0.0)
 	damaged.emit(self, final_amount)
+	if absorbed > 0.0:
+		shield_hit.emit(self, absorbed, shield <= 0.0)
 	if health <= 0.0:
 		_die()
 		return
@@ -392,8 +402,10 @@ func _within_reach(other: Unit) -> bool:
 	return _flat_distance(other) <= data.detection_range
 
 
-func _is_valid_target(other: Unit) -> bool:
-	return other != null and is_instance_valid(other) and other.is_alive() and is_hostile_to(other)
+## Sem tipo no parâmetro de propósito: o alvo guardado pode já ter sido removido da cena, e
+## passar um objeto liberado para um parâmetro tipado gera erro antes do teste de validade.
+func _is_valid_target(other) -> bool:
+	return other != null and is_instance_valid(other) and other is Unit and other.is_alive() and is_hostile_to(other)
 
 
 func _die() -> void:
@@ -411,6 +423,9 @@ func _die() -> void:
 
 
 func _tick_timers(delta: float) -> void:
+	_since_damage += delta
+	if data.has_shield() and shield < data.shield_max and _since_damage >= data.shield_regen_delay:
+		shield = minf(shield + data.shield_regen_rate * delta, data.shield_max)
 	for key in _cooldowns.keys():
 		_cooldowns[key] -= delta
 		if _cooldowns[key] <= 0.0:
@@ -497,16 +512,19 @@ func _build_body() -> void:
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = data.body_color
 	mat.roughness = 0.8
-	var capsule := CapsuleMesh.new()
-	capsule.radius = data.body_radius
-	capsule.height = data.body_height
-	capsule.material = mat
-	var body := MeshInstance3D.new()
-	body.mesh = capsule
-	body.position = Vector3.UP * data.center_height()
-	if data.body_shape == UnitData.BodyShape.ROD:
-		body.rotation_degrees.x = 90.0
-	pivot.add_child(body)
+	if data.body_shape == UnitData.BodyShape.CREATURE:
+		_build_creature_meshes(pivot, mat)
+	else:
+		var capsule := CapsuleMesh.new()
+		capsule.radius = data.body_radius
+		capsule.height = data.body_height
+		capsule.material = mat
+		var body := MeshInstance3D.new()
+		body.mesh = capsule
+		body.position = Vector3.UP * data.center_height()
+		if data.body_shape == UnitData.BodyShape.ROD:
+			body.rotation_degrees.x = 90.0
+		pivot.add_child(body)
 
 	if data.body_shape == UnitData.BodyShape.UPRIGHT:
 		# Visor azul no lado da frente (-Z), para ver para onde o soldado está virado.
@@ -522,10 +540,86 @@ func _build_body() -> void:
 		visor.position = Vector3(0.0, data.body_height * 0.78, -data.body_radius * 0.85)
 		pivot.add_child(visor)
 
+	if data.capsule_protection > 0.0:
+		_build_capsule_shell(pivot)
+
 	var visuals := UnitVisualsScript.new()
 	visuals.name = "Visuals"
 	add_child(visuals)
 	visuals.setup(self, pivot, mat)
+
+
+## Corpo provisório de invasor humanoide: tronco curvado para a frente, cabeça sem rosto
+## e espinhos curtos nas costas (os pili da bactéria). Vira o modelo 3D quando ele existir.
+func _build_creature_meshes(pivot: Node3D, mat: StandardMaterial3D) -> void:
+	var r := data.body_radius
+	var h := data.body_height
+	var torso_mesh := CapsuleMesh.new()
+	torso_mesh.radius = r * 0.85
+	torso_mesh.height = h * 0.75
+	torso_mesh.material = mat
+	var torso := MeshInstance3D.new()
+	torso.mesh = torso_mesh
+	torso.position = Vector3(0.0, h * 0.45, 0.0)
+	torso.rotation_degrees.x = -25.0  # Curvado para a frente (-Z).
+	pivot.add_child(torso)
+
+	var head_mesh := SphereMesh.new()
+	head_mesh.radius = r * 0.6
+	head_mesh.height = r * 1.0
+	head_mesh.material = mat
+	var head := MeshInstance3D.new()
+	head.mesh = head_mesh
+	head.position = Vector3(0.0, h * 0.78, -r * 0.75)
+	pivot.add_child(head)
+
+	var spike_mat := StandardMaterial3D.new()
+	spike_mat.albedo_color = data.body_color.darkened(0.45)
+	spike_mat.roughness = 0.6
+	for i in 3:
+		var spike_mesh := CylinderMesh.new()
+		spike_mesh.top_radius = 0.0
+		spike_mesh.bottom_radius = r * 0.18
+		spike_mesh.height = r * 0.7
+		spike_mesh.material = spike_mat
+		var spike := MeshInstance3D.new()
+		spike.mesh = spike_mesh
+		spike.position = Vector3((i - 1) * r * 0.35, h * 0.62 - i * 0.05, r * 0.55)
+		spike.rotation_degrees.x = 40.0  # Apontam para trás e para cima.
+		pivot.add_child(spike)
+
+	# Brilho tóxico no peito, para o invasor ler bem de longe sobre o chão vermelho.
+	var glow_mat := StandardMaterial3D.new()
+	glow_mat.albedo_color = Color(0.85, 1.0, 0.3)
+	glow_mat.emission_enabled = true
+	glow_mat.emission = Color(0.6, 0.9, 0.1)
+	glow_mat.emission_energy_multiplier = 1.5
+	var glow_mesh := SphereMesh.new()
+	glow_mesh.radius = r * 0.22
+	glow_mesh.height = r * 0.44
+	glow_mesh.material = glow_mat
+	var glow := MeshInstance3D.new()
+	glow.mesh = glow_mesh
+	glow.position = Vector3(0.0, h * 0.5, -r * 0.8)
+	pivot.add_child(glow)
+
+
+## Camada translúcida da cápsula em volta do corpo (bactéria encapsulada).
+func _build_capsule_shell(pivot: Node3D) -> void:
+	var shell_mat := StandardMaterial3D.new()
+	shell_mat.albedo_color = data.capsule_color
+	shell_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	shell_mat.roughness = 0.15
+	var shell_mesh := CapsuleMesh.new()
+	shell_mesh.radius = data.body_radius * 1.35
+	shell_mesh.height = data.body_height * 1.1
+	shell_mesh.material = shell_mat
+	var shell := MeshInstance3D.new()
+	shell.name = "Capsule"
+	shell.mesh = shell_mesh
+	shell.position = Vector3.UP * data.center_height()
+	shell.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	pivot.add_child(shell)
 
 
 func _build_selection_ring() -> void:

@@ -9,6 +9,7 @@ const COLOR_PLAYER := Color(0.3, 0.9, 0.35)
 const COLOR_PLAYER_LOW := Color(0.95, 0.3, 0.25)  ## Aliado com pouca vida.
 const COLOR_ENEMY := Color(0.95, 0.7, 0.15)  ## Amarelo: ameaça (GDD 2.2).
 const LOW_HEALTH := 0.35
+const COLOR_SHIELD := Color(0.35, 0.85, 1.0)
 const EFFECT_COLORS := {
 	AbilityData.Effect.SPEED: Color(0.3, 0.85, 1.0),
 	AbilityData.Effect.DAMAGE: Color(1.0, 0.45, 0.3),
@@ -41,6 +42,12 @@ func _draw() -> void:
 			color = COLOR_PLAYER_LOW if ratio < LOW_HEALTH else COLOR_PLAYER
 		draw_rect(rect.grow(1.0), COLOR_BACK)
 		draw_rect(Rect2(rect.position, Vector2(rect.size.x * ratio, rect.size.y)), color)
+		if unit.data.has_shield():
+			# Faixa fina do escudo de bioenergia logo acima da vida.
+			var shield_rect := Rect2(rect.position - Vector2(0.0, 4.0), Vector2(rect.size.x, 3.0))
+			draw_rect(shield_rect.grow(1.0), COLOR_BACK)
+			var shield_ratio := clampf(unit.shield / unit.data.shield_max, 0.0, 1.0)
+			draw_rect(Rect2(shield_rect.position, Vector2(shield_rect.size.x * shield_ratio, shield_rect.size.y)), COLOR_SHIELD)
 		_draw_effects(unit, rect)
 
 

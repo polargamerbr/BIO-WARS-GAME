@@ -14,8 +14,8 @@ Documentação em `docs/`: `GDD.md`, `TECHNICAL_PLAN.md`, `DECISIONS.md`, `CHANG
 
 A MISSÃO 001 — PRIMEIRO CONTATO, jogável do começo ao fim. O jogo abre na ordem de missão (Enter para começar).
 
-- 3 NEUTROPHIL e 1 MACROPHAGE (corpos provisórios), armados com fuzil, partem da área verde.
-- Dois focos de invasão: BRAVO (2 bactérias comuns) e ALFA (3 comuns e 1 encapsulada, cuja cápsula bloqueia boa parte do dano).
+- 3 NEUTROPHIL (fuzil) e 1 MACROPHAGE (corpo a corpo, com escudo de bioenergia) partem da área verde. Os corpos são provisórios.
+- Dois focos de invasão com bactérias humanoides: BRAVO (2 comuns) e ALFA (3 comuns e 1 encapsulada, cuja cápsula translúcida bloqueia boa parte do dano).
 - Vitória: controlar os dois focos (eliminar os invasores e ocupar a área).
 - Derrota: o dano tecidual, que cresce enquanto há invasores vivos, chega a 100%, ou todas as unidades caem.
 - Objetivo secundário: terminar com dano tecidual abaixo de 35%.
@@ -48,6 +48,10 @@ Controles:
    ```
 
 O resultado é `build/windows/BIOWAR_FRONTLINE.exe`, com os dados do jogo embutidos (a pasta `build/` não vai para o Git).
+
+## Arte
+
+Prompts para gerar as referências de arte no Gemini antes de gastar créditos de 3D: `docs/ART_PROMPTS.md`.
 
 ## Sons
 

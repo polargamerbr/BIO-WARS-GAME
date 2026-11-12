@@ -16,6 +16,8 @@ const SOUNDS := {
 	"order_attack": [-8.0, 0.05],
 	"attack_player": [-14.0, 0.07],
 	"rifle_shot": [-15.0, 0.06],
+	"shield_hit": [-16.0, 0.12],
+	"shield_break": [-8.0, 0.3],
 	"attack_enemy": [-16.0, 0.07],
 	"death_enemy": [-6.0, 0.05],
 	"death_player": [-4.0, 0.05],
@@ -71,6 +73,8 @@ func watch_unit(unit: Unit) -> void:
 			play("attack_player" if attacker.team == Unit.Team.PLAYER else "attack_enemy"))
 	unit.died.connect(func(dead: Unit):
 		play("death_player" if dead.team == Unit.Team.PLAYER else "death_enemy"))
+	unit.shield_hit.connect(func(_u: Unit, _absorbed: float, broken: bool):
+		play("shield_break" if broken else "shield_hit"))
 	unit.ability_used.connect(func(_u: Unit, ability: AbilityData):
 		play("ability_speed" if ability.effect == AbilityData.Effect.SPEED else "ability_cytokine"))
 
