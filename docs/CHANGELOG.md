@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## [0.4.0] Modelos 3D de toda a tropa e dos invasores (2026-11-12)
+
+### Adicionado
+- Modelos recebidos pela ponte do Tripo e ligados ao jogo:
+  - **MACROPHAGE** (`TripoModels/Macrophage/`, 24 mil triângulos). Animações: "esperar de braços cruzados" (parado), "andar com escudo", "atacar com braço esquerdo" (o braço das garras) e "posição de defesa com escudo" (estado DEFENDING). Não tem animação de queda: ao morrer, afunda.
+  - **BACTÉRIA COMUM** (`TripoModels/alien_monster_3d_model/`, 19 mil triângulos). Animações: "box_02" (parado, em guarda), "run", "ataque de garras em X" e "defeat_03" (queda).
+  - **BACTÉRIA ENCAPSULADA:** usa o mesmo modelo da comum, maior (2 m), dentro da cápsula translúcida feita no Godot, até ter modelo próprio.
+  - **Fuzil do NEUTROPHIL** (`TripoModels/neutrophil_rifle/`). `scripts/units/unit_weapon_holder.gd` prende a arma à mão direita do modelo. Com a mão de apoio na arma, como na animação de tiro, o cano aponta para ela; senão, a arma fica pronta, apontada para a frente e para baixo.
+  - **Obstáculo de tecido** (`TripoModels/muscle_tissue_3d_model/`) no lugar das caixas marrons, esticado para o tamanho de cada bloco. A colisão e a navegação continuam com as caixas.
+- Escudo de bioenergia com padrão de colmeia (`assets/effects/bioenergy_shield.gdshader`), no estilo da arte conceitual: oval, translúcido, com células pulsando, borda brilhante e clarão ao absorver dano.
+- Campos novos no `UnitData`:
+  - `anim_defend` (postura em formação que mantém posição);
+  - arma: `weapon_scene`, `weapon_length`, `weapon_hand_bone`, `weapon_support_bone` e `weapon_grip`.
+
+### Testado
+- Vitrine no jogo, com capturas de perto:
+  - tropa parada com o fuzil na mão e o MACROPHAGE com o escudo;
+  - formação DEFENSIVA com a postura de defesa;
+  - combate com os NEUTROPHILS mirando com o fuzil, o MACROPHAGE atacando, as bactérias com garras e a encapsulada na cápsula;
+  - obstáculos de tecido no mapa.
+- Cada animação troca certo conforme o estado.
+- Testes de missão, combate, estratégia, seleção e do modelo (ver o resultado do commit).
+
+### Pendente
+- Modelo próprio da bactéria encapsulada (checklist no ART_PROMPTS).
+- Os modelos continuam em `TripoModels/`, com os nomes vindos do Tripo. Para mover ou renomear, use o painel FileSystem do editor do Godot.
+
+
 ## [0.3.0] Primeiro modelo 3D: NEUTROPHIL (2026-11-12)
 
 ### Adicionado

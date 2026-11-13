@@ -1,7 +1,7 @@
 extends Node
 ## Toca as animações do modelo 3D (com esqueleto) conforme o estado da unidade.
 ## Só lê a unidade; não interfere em movimento nem combate.
-##   Parada: idle. Andando: walk ou run, conforme a velocidade. Atacando parada: attack.
+##   Parada: idle (ou defend, em formação que mantém posição). Andando: walk ou run, conforme a velocidade. Atacando parada: attack.
 ##   Eliminada: death, uma vez só.
 ## Os nomes das animações vêm do UnitData, porque cada exportação do Tripo nomeia diferente.
 ## Andar e correr no jogo vêm da navegação; por isso o avanço da animação ("root motion")
@@ -26,7 +26,7 @@ func setup(unit: Unit, model: Node3D) -> void:
 		return
 	_player = players[0]
 	var data := unit.data
-	for anim_name in [data.anim_idle, data.anim_walk, data.anim_run, data.anim_attack]:
+	for anim_name in [data.anim_idle, data.anim_walk, data.anim_run, data.anim_attack, data.anim_defend]:
 		_prepare_loop(anim_name)
 	unit.died.connect(_on_died)
 	# Começa em um ponto aleatório do idle, para a tropa não respirar em sincronia.
@@ -48,6 +48,8 @@ func _process(_delta: float) -> void:
 			wanted = data.anim_run
 	elif _unit.state == Unit.State.ATTACKING:
 		wanted = data.anim_attack
+	elif _unit.state == Unit.State.DEFENDING and _has(data.anim_defend):
+		wanted = data.anim_defend
 	_play(wanted)
 
 

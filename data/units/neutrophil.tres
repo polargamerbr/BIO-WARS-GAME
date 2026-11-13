@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="UnitData" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="UnitData" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/units/unit_data.gd" id="1_data"]
 [ext_resource type="Script" path="res://scripts/abilities/ability_data.gd" id="2_ability_script"]
 [ext_resource type="Resource" path="res://data/abilities/rapid_mobilization.tres" id="3_mobilization"]
 [ext_resource type="PackedScene" uid="uid://d15auw5l13osu" path="res://TripoModels/futuristic_soldier_3d_model/futuristic_soldier_3d_model.fbx" id="4_model"]
+[ext_resource type="PackedScene" uid="uid://bd25y3r3urtfw" path="res://TripoModels/neutrophil_rifle/neutrophil_rifle.fbx" id="5_rifle"]
 
 [resource]
 script = ExtResource("1_data")
@@ -26,6 +27,9 @@ anim_walk = &"walk"
 anim_run = &"run"
 anim_attack = &"atirar com fuzil de assalto"
 anim_death = &"fall"
+weapon_scene = ExtResource("5_rifle")
+weapon_length = 0.8
+weapon_grip = Vector3(0, 0.2, 0)
 body_shape = 0
 body_radius = 0.5
 body_height = 1.8

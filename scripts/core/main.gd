@@ -18,6 +18,8 @@ const AudioManagerScript := preload("res://scripts/core/audio_manager.gd")
 const MAP_SIZE := 80.0
 const GROUND_TEXTURE := preload("res://assets/environments/textures/tissue_ground.jpeg")
 const GROUND_TILE_METERS := 24.0  ## Tamanho de cada repetição da textura do chão.
+## Modelo dos obstáculos de tecido. É esticado para o tamanho de cada bloco de colisão.
+const OBSTACLE_SCENE := preload("res://TripoModels/muscle_tissue_3d_model/muscle_tissue_3d_model.fbx")
 ## Missão carregada ao abrir. Unidades, focos e condições vêm todos deste arquivo.
 const MISSION_PATH := "res://data/missions/mission_001_first_contact.tres"
 
@@ -166,6 +168,28 @@ func _build_ground() -> void:
 	_add_static_block("Ground", Vector3(0.0, -0.5, 0.0), Vector3(MAP_SIZE, 1.0, MAP_SIZE), mat)
 
 
+## Troca a caixa visível do obstáculo pelo modelo de tecido, esticado para o tamanho do
+## bloco. A colisão e a navegação continuam usando a caixa.
+func _dress_obstacle(body: Node3D, size: Vector3) -> void:
+	for child in body.get_children():
+		if child is MeshInstance3D:
+			child.visible = false
+	var model := OBSTACLE_SCENE.instantiate() as Node3D
+	body.add_child(model)
+	var box := AABB()
+	var first := true
+	for mi in model.find_children("*", "MeshInstance3D", true, false):
+		var b: AABB = (model.global_transform.affine_inverse() * mi.global_transform) * mi.mesh.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	# O lado mais comprido do modelo (X) acompanha o lado mais comprido do bloco.
+	var along_z := size.z > size.x
+	var footprint := Vector2(size.z, size.x) if along_z else Vector2(size.x, size.z)
+	model.rotation_degrees.y = 90.0 if along_z else 0.0
+	model.scale = Vector3(footprint.x / box.size.x, size.y / box.size.y, footprint.y / box.size.z)
+	model.position = Vector3(0.0, -size.y * 0.5 - box.position.y * model.scale.y, 0.0)
+
+
 func _build_grid() -> void:
 	var lines := ImmediateMesh.new()
 	lines.surface_begin(Mesh.PRIMITIVE_LINES)
@@ -205,6 +229,7 @@ func _build_obstacles() -> void:
 	var i := 0
 	for o in obstacles:
 		_add_static_block("Obstacle%d" % i, o[0], o[1], mat, true)
+		_dress_obstacle(_nav_region.get_node("Obstacle%d" % i), o[1])
 		i += 1
 
 

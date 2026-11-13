@@ -114,6 +114,12 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
 - **Esqueleto:** Mixamo, que é padrão, funciona bem no Godot e permite reaproveitar animações entre os soldados.
 - **Formato:** a ponte entrega FBX com texturas em pasta ao lado. O Godot importa FBX direto.
 
+### D018: Armas, escudo e obstáculos com os modelos (2026-11-12)
+- **Arma separada:** o fuzil é um modelo próprio, posicionado a cada quadro pela mão principal e apontado para a mão de apoio quando as duas estão na arma. Isso funciona com qualquer animação, sem ajustar ângulo por animação. A arma é só visual.
+- **Escudo de bioenergia:** é um efeito do Godot (shader de colmeia) e não faz parte do modelo, porque a transparência não sobrevive à conversão em 3D do Tripo. O modelo só traz o emissor no antebraço.
+- **Encapsulada:** reaproveita o modelo da bactéria comum, maior e com a cápsula translúcida do Godot, até o modelo próprio existir.
+- **Obstáculos:** o modelo de tecido é só visual e é esticado para a caixa de colisão. Assim a navegação e a linha de visão continuam exatas.
+
 ## Em aberto
 
 - **Recurso do jogador:** o GDD fala em "recursos iniciais" sem definir o que são. Ideia em avaliação: sinais inflamatórios para chamar reforços.

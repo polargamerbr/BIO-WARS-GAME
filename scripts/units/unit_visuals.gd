@@ -17,6 +17,7 @@ const FLASH_ENERGY := 2.5
 const FLASH_TIME := 0.15
 const SHIELD_COLOR := Color(0.35, 0.85, 1.0)
 const SHIELD_ALPHA := 0.35
+const SHIELD_SHADER := preload("res://assets/effects/bioenergy_shield.gdshader")
 
 var _unit: Unit
 var _pivot: Node3D
@@ -24,7 +25,9 @@ var _material: StandardMaterial3D
 var _time := 0.0
 var _lunge := 0.0
 var _shield_panel: MeshInstance3D
-var _shield_mat: StandardMaterial3D
+var _shield_mat: ShaderMaterial
+var _shield_flash := 0.0
+var _shield_strength := 1.0
 var _overlay: StandardMaterial3D  ## Clarão de dano sobre o modelo 3D.
 var _phase := 0.0  ## Defasagem aleatória para as unidades não se moverem em sincronia.
 
@@ -112,39 +115,37 @@ func _animate_creature(t: float, moving: bool, speed: float, speed_ratio: float)
 	_pivot.rotation.z = sway
 
 
+## Painel oval de bioenergia com padrão de colmeia, à frente do corpo (shader próprio).
 func _build_shield_panel() -> void:
 	var r := _unit.data.body_radius
 	var h := _unit.data.body_height
-	_shield_mat = StandardMaterial3D.new()
-	_shield_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_shield_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	_shield_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	_shield_mat.albedo_color = Color(SHIELD_COLOR, SHIELD_ALPHA)
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(r * 2.4, h * 0.85, 0.05)
+	_shield_mat = ShaderMaterial.new()
+	_shield_mat.shader = SHIELD_SHADER
+	_shield_mat.set_shader_parameter("shield_color", SHIELD_COLOR)
+	var mesh := QuadMesh.new()
+	mesh.size = Vector2(r * 2.6, h * 0.95)
 	mesh.material = _shield_mat
 	_shield_panel = MeshInstance3D.new()
 	_shield_panel.name = "ShieldPanel"
 	_shield_panel.mesh = mesh
-	_shield_panel.position = Vector3(0.0, h * 0.5, -r - 0.35)
+	_shield_panel.position = Vector3(0.0, h * 0.5, -r - 0.45)
 	_shield_panel.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_pivot.add_child(_shield_panel)
 
 
-func _update_shield_panel(t: float) -> void:
+func _update_shield_panel(_t: float) -> void:
 	var ratio := _unit.shield / _unit.data.shield_max
-	_shield_panel.visible = ratio > 0.0
-	if ratio <= 0.0:
-		return
-	# Mais forte com o escudo cheio, com uma pulsação leve de energia.
-	var target_alpha := SHIELD_ALPHA * (0.35 + 0.65 * ratio) * (0.9 + 0.1 * sin(t * 6.0))
-	_shield_mat.albedo_color.a = lerpf(_shield_mat.albedo_color.a, target_alpha, 0.2)
+	_shield_panel.visible = ratio > 0.0 or _shield_flash > 0.01
+	# Mais forte com o escudo cheio; nunca some de todo enquanto há carga.
+	_shield_strength = lerpf(_shield_strength, 0.35 + 0.65 * ratio, 0.2)
+	_shield_mat.set_shader_parameter("strength", _shield_strength if ratio > 0.0 else 0.0)
+	_shield_mat.set_shader_parameter("flash", _shield_flash)
 
 
 func _on_shield_hit(_unit_hit: Unit, _absorbed: float, broken: bool) -> void:
-	_shield_mat.albedo_color = Color(Color.WHITE, 0.9)
+	_shield_flash = 1.0
 	var tween := create_tween()
-	tween.tween_property(_shield_mat, "albedo_color", Color(SHIELD_COLOR, SHIELD_ALPHA), 0.2)
+	tween.tween_property(self, "_shield_flash", 0.0, 0.25)
 	if broken:
 		# Estoura: cresce e volta ao tamanho normal (fica invisível até recarregar).
 		_shield_panel.scale = Vector3.ONE * 1.3

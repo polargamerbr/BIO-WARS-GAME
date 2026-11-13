@@ -30,6 +30,7 @@ const LAYER_UNITS := 2  ## Unidades, usada para escolher com o mouse.
 const GROUP := &"units"
 const UnitVisualsScript := preload("res://scripts/units/unit_visuals.gd")
 const UnitModelAnimatorScript := preload("res://scripts/units/unit_model_animator.gd")
+const UnitWeaponHolderScript := preload("res://scripts/units/unit_weapon_holder.gd")
 const MODEL_DEATH_HOLD := 1.6  ## Segundos que o corpo com modelo fica no chão antes de sumir.
 const ProjectileScript := preload("res://scripts/combat/projectile.gd")
 const PROJECTILE_COLOR_PLAYER := Color(1.0, 0.85, 0.45)
@@ -529,6 +530,13 @@ func _build_body() -> void:
 		animator.name = "ModelAnimator"
 		add_child(animator)
 		animator.setup(self, model)
+		if data.weapon_scene != null:
+			var holder := UnitWeaponHolderScript.new()
+			holder.name = "WeaponHolder"
+			add_child(holder)
+			holder.setup(self, model)
+		if data.capsule_protection > 0.0:
+			_build_capsule_shell(pivot)
 		return
 	if data.body_shape == UnitData.BodyShape.CREATURE:
 		_build_creature_meshes(pivot, mat)

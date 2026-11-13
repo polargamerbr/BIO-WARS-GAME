@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="UnitData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="UnitData" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/units/unit_data.gd" id="1_data"]
 [ext_resource type="Script" path="res://scripts/abilities/ability_data.gd" id="2_ability_script"]
 [ext_resource type="Resource" path="res://data/abilities/cytokine_signal.tres" id="3_cytokines"]
+[ext_resource type="PackedScene" uid="uid://da21bu6ooa7sa" path="res://TripoModels/Macrophage/Macrophage.fbx" id="4_model"]
 
 [resource]
 script = ExtResource("1_data")
@@ -19,6 +20,13 @@ shield_max = 120.0
 shield_regen_delay = 4.0
 shield_regen_rate = 30.0
 abilities = Array[ExtResource("2_ability_script")]([ExtResource("3_cytokines")])
+model_scene = ExtResource("4_model")
+model_yaw_degrees = 180.0
+model_root_bone = &"mixamorig_Hips"
+anim_idle = &"esperar de braços cruzados"
+anim_walk = &"andar com escudo"
+anim_attack = &"atacar com braço esquerdo"
+anim_defend = &"posição de defesa com escudo"
 body_shape = 0
 body_radius = 0.75
 body_height = 2.2

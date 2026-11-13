@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="UnitData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="UnitData" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/units/unit_data.gd" id="1_data"]
+[ext_resource type="PackedScene" uid="uid://bvmew08ogvvyu" path="res://TripoModels/alien_monster_3d_model/alien_monster_3d_model.fbx" id="2_model"]
 
 [resource]
 script = ExtResource("1_data")
@@ -14,6 +15,13 @@ attack_cooldown = 1.0
 attack_range = 1.5
 detection_range = 8.0
 tissue_damage_rate = 0.2
+model_scene = ExtResource("2_model")
+model_yaw_degrees = 180.0
+model_root_bone = &"mixamorig_Hips"
+anim_idle = &"box_02"
+anim_run = &"run"
+anim_attack = &"ataque de garras em X"
+anim_death = &"defeat_03"
 body_shape = 2
 body_radius = 0.45
 body_height = 1.7

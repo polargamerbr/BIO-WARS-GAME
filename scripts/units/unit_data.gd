@@ -55,6 +55,17 @@ enum BodyShape { UPRIGHT, ROD, CREATURE }
 @export var anim_run: StringName = &""
 @export var anim_attack: StringName = &""
 @export var anim_death: StringName = &""
+## Postura parada em formação que mantém posição (estado DEFENDING). Vazio = usa anim_idle.
+@export var anim_defend: StringName = &""
+
+@export_group("Arma (modelo separado)")
+## Cena da arma, presa à mão do modelo. Vazio = sem arma visível.
+@export var weapon_scene: PackedScene
+@export var weapon_length: float = 0.8  ## Metros do cano à coronha no jogo.
+@export var weapon_hand_bone: StringName = &"mixamorig_RightHand"
+@export var weapon_support_bone: StringName = &"mixamorig_LeftHand"
+## Ponto do punho no espaço do modelo da arma (antes da escala). +X é o cano.
+@export var weapon_grip: Vector3 = Vector3.ZERO
 
 @export_group("Corpo provisório")
 @export var body_shape: BodyShape = BodyShape.UPRIGHT
