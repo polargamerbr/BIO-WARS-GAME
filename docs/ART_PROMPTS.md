@@ -6,7 +6,7 @@ Prompts para gerar as imagens de referência no Gemini (ou outra IA de imagem) *
 
 1. **Gerar e iterar a imagem 2D no Gemini** (barato ou grátis). Repita até ficar boa. Errar aqui não custa crédito de 3D.
 2. **Conferir a imagem** com a checklist do fim deste arquivo.
-3. **Mandar só a imagem aprovada para o Tripo** (imagem → modelo 3D). Uma geração por asset, em vez de várias tentativas por texto.
+3. **Mandar só a imagem aprovada para o Tripo** (imagem → modelo 3D). Uma geração por asset, em vez de várias tentativas por texto. Com o editor do Godot aberto, envie o modelo pronto pela ponte (DCC Bridge). Ele chega sozinho em `res://TripoModels/` (veja o README).
 4. Se o Tripo aceitar várias vistas (*multiview*), gere frente, lado e costas no Gemini e mande as três. O modelo sai mais fiel.
 5. **Armas em arquivo separado** do soldado. No Godot, a arma vai presa ao osso da mão. Isso facilita o rig, a animação e a troca de arma.
 6. Os arquivos vão para `assets/units/<unidade>/reference/`, `assets/enemies/<tipo>/reference/` ou `assets/environments/reference/` (imagens) e para a pasta da unidade (o `.glb`). As pastas `reference/` ficam fora do executável. Arte conceitual, que não vira 3D, vai para `docs/art/concept/`.

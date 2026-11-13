@@ -101,6 +101,19 @@ Registro das decisões do projeto. Uma entrada por decisão, com data.
 - **Balanceamento (simulação):** vitória em todas as estratégias, com 0 a 1 perda. A boa jogada fica em ~22 s e ~22% de dano tecidual.
 - **Pendente:** os invasores escolhem sempre o alvo mais próximo, então às vezes ignoram o MACROPHAGE e atacam os NEUTROPHILS. Uma habilidade de provocação faria dele um tanque de verdade.
 
+### D016: Modelos 3D chegam pela ponte do Tripo (2026-11-11)
+- **Decisão (do diretor do projeto):** os modelos 3D são gerados no Tripo Studio e enviados ao Godot pelo plugin Tripo Bridge. O plugin foi movido para `addons/tripo_bridge/` (antes ficava na raiz, onde o Godot não o reconhecia) e ativado no projeto.
+- **Fluxo:** a imagem de referência é aprovada (ART_PROMPTS) e vira modelo no Tripo Studio. O modelo é enviado pela ponte, chega em `res://TripoModels/` e depois vai para a pasta da unidade, onde substitui o corpo provisório.
+- **Por que não a API:** a API exige chave própria e normalmente tem cobrança separada da assinatura do site. A ponte usa a mesma geração que já seria feita no site.
+- **Segurança:** o servidor do plugin escuta só em `127.0.0.1:60650`, no próprio computador. O plugin fica fora do executável. Ele grava em `project.godot` a data da última limpeza de arquivos temporários (`tripo_bridge/last_cleanup`).
+
+### D017: Como os modelos 3D entram no jogo (2026-11-12)
+- **Dados:** cada unidade aponta para o modelo no `UnitData` (`model_scene`), com o giro para a frente e os nomes das animações. Trocar ou adicionar modelos não exige mudar código.
+- **Escala:** o modelo é ajustado à `body_height` da unidade. A colisão continua sendo a cápsula do `UnitData`.
+- **Animação:** o deslocamento vem da navegação, então o avanço das animações (root motion) é retirado do osso raiz. Repetição ligada para parado, andar, correr e atacar.
+- **Esqueleto:** Mixamo, que é padrão, funciona bem no Godot e permite reaproveitar animações entre os soldados.
+- **Formato:** a ponte entrega FBX com texturas em pasta ao lado. O Godot importa FBX direto.
+
 ## Em aberto
 
 - **Recurso do jogador:** o GDD fala em "recursos iniciais" sem definir o que são. Ideia em avaliação: sinais inflamatórios para chamar reforços.

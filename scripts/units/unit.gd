@@ -29,6 +29,8 @@ const LAYER_WORLD := 1  ## Chão e obstáculos.
 const LAYER_UNITS := 2  ## Unidades, usada para escolher com o mouse.
 const GROUP := &"units"
 const UnitVisualsScript := preload("res://scripts/units/unit_visuals.gd")
+const UnitModelAnimatorScript := preload("res://scripts/units/unit_model_animator.gd")
+const MODEL_DEATH_HOLD := 1.6  ## Segundos que o corpo com modelo fica no chão antes de sumir.
 const ProjectileScript := preload("res://scripts/combat/projectile.gd")
 const PROJECTILE_COLOR_PLAYER := Color(1.0, 0.85, 0.45)
 const PROJECTILE_COLOR_ENEMY := Color(0.85, 0.9, 0.3)
@@ -418,7 +420,12 @@ func _die() -> void:
 	velocity = Vector3.ZERO
 	died.emit(self)
 	var tween := create_tween()
-	tween.tween_property(self, "scale", Vector3(1.2, 0.05, 1.2), 0.5)
+	if data.has_model():
+		# O modelo toca a animação de queda; depois o corpo afunda no tecido e some.
+		tween.tween_interval(MODEL_DEATH_HOLD)
+		tween.tween_property(self, "position:y", position.y - 1.0, 0.6)
+	else:
+		tween.tween_property(self, "scale", Vector3(1.2, 0.05, 1.2), 0.5)
 	tween.tween_callback(queue_free)
 
 
@@ -512,6 +519,17 @@ func _build_body() -> void:
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = data.body_color
 	mat.roughness = 0.8
+	if data.has_model():
+		var model := _build_model(pivot)
+		var visuals_model := UnitVisualsScript.new()
+		visuals_model.name = "Visuals"
+		add_child(visuals_model)
+		visuals_model.setup(self, pivot, null)
+		var animator := UnitModelAnimatorScript.new()
+		animator.name = "ModelAnimator"
+		add_child(animator)
+		animator.setup(self, model)
+		return
 	if data.body_shape == UnitData.BodyShape.CREATURE:
 		_build_creature_meshes(pivot, mat)
 	else:
@@ -547,6 +565,26 @@ func _build_body() -> void:
 	visuals.name = "Visuals"
 	add_child(visuals)
 	visuals.setup(self, pivot, mat)
+
+
+## Instancia o modelo 3D, gira para a frente da unidade (-Z) e ajusta a escala para a altura
+## do corpo (body_height), medindo a caixa da malha na pose de repouso. Os pés ficam em y = 0.
+func _build_model(pivot: Node3D) -> Node3D:
+	var model := data.model_scene.instantiate() as Node3D
+	model.name = "Model"
+	pivot.add_child(model)
+	model.rotation_degrees.y = data.model_yaw_degrees
+	var box := AABB()
+	var first := true
+	for mi in model.find_children("*", "MeshInstance3D", true, false):
+		var mesh_box: AABB = (model.global_transform.affine_inverse() * mi.global_transform) * mi.mesh.get_aabb()
+		box = mesh_box if first else box.merge(mesh_box)
+		first = false
+	if not first and box.size.y > 0.01:
+		var s := data.body_height / box.size.y
+		model.scale = Vector3.ONE * s
+		model.position.y = -box.position.y * s
+	return model
 
 
 ## Corpo provisório de invasor humanoide: tronco curvado para a frente, cabeça sem rosto

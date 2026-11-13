@@ -2,20 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://crpicoyukk10d"
-path="res://.godot/imported/tripo_logo.png-cd49b9ce038f8f67e9b79cfe6a1226cc.ctex"
+uid="uid://degaobavbmgmf"
+path.s3tc="res://.godot/imported/futuristic_soldier_3d_model_metallic.JPEG-30e5cd93df2d7f67c562aa036a7176d6.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://Tripo3d_Godot_Bridge/resources/tripo_logo.png"
-dest_files=["res://.godot/imported/tripo_logo.png-cd49b9ce038f8f67e9b79cfe6a1226cc.ctex"]
+source_file="res://TripoModels/futuristic_soldier_3d_model/tripo_convert_a0c872f9-e805-4292-81e8-923a45b5c07c.fbm/futuristic_soldier_3d_model_metallic.JPEG"
+dest_files=["res://.godot/imported/futuristic_soldier_3d_model_metallic.JPEG-30e5cd93df2d7f67c562aa036a7176d6.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -23,7 +24,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
@@ -37,4 +38,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0

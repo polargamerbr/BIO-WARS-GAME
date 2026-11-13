@@ -49,6 +49,16 @@ Controles:
 
 O resultado é `build/windows/BIOWAR_FRONTLINE.exe`, com os dados do jogo embutidos (a pasta `build/` não vai para o Git).
 
+## Modelos 3D pelo Tripo (ponte direta)
+
+O plugin **Tripo Bridge** (`addons/tripo_bridge/`) já vem ativado. Ele recebe no editor do Godot os modelos gerados no Tripo Studio, sem baixar e importar à mão.
+
+1. Abra o projeto no **editor** do Godot. O plugin mostra o painel "Tripo Bridge" e fica esperando conexão em `ws://127.0.0.1:60650` (só no seu computador).
+2. No **Tripo Studio** (site), gere o modelo a partir da imagem de referência da unidade (`assets/.../reference/`) e use a opção de enviar para o Godot (DCC Bridge). Guia oficial: https://www.tripo3d.ai/pt/blog/tripo-dcc-bridge-guide-hub
+3. O modelo chega em `res://TripoModels/`. Depois é levado para a pasta da unidade (por exemplo, `assets/units/neutrophil/`) e ligado ao jogo no lugar da cápsula provisória.
+
+O plugin só funciona no editor e fica fora do executável.
+
 ## Arte
 
 Prompts para gerar as referências de arte no Gemini antes de gastar créditos de 3D: `docs/ART_PROMPTS.md`.

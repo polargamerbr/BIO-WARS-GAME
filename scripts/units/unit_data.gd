@@ -42,11 +42,29 @@ enum BodyShape { UPRIGHT, ROD, CREATURE }
 @export_group("Habilidades")
 @export var abilities: Array[AbilityData] = []
 
+@export_group("Modelo 3D")
+## Cena do modelo (FBX ou GLB, com esqueleto). Vazio = usa o corpo provisório de cápsulas.
+@export var model_scene: PackedScene
+## Giro do modelo em graus, para ele olhar para -Z (a frente da unidade).
+@export var model_yaw_degrees: float = 0.0
+## Osso raiz cujo avanço horizontal é retirado das animações em repetição.
+@export var model_root_bone: StringName = &""
+## Nomes das animações dentro do modelo (cada exportação nomeia diferente).
+@export var anim_idle: StringName = &""
+@export var anim_walk: StringName = &""
+@export var anim_run: StringName = &""
+@export var anim_attack: StringName = &""
+@export var anim_death: StringName = &""
+
 @export_group("Corpo provisório")
 @export var body_shape: BodyShape = BodyShape.UPRIGHT
 @export var body_radius: float = 0.5  ## Metros. Também é o raio do agente de navegação.
 @export var body_height: float = 1.8  ## Metros. No bastonete, é o comprimento.
 @export var body_color: Color = Color(0.5, 0.5, 0.5)
+
+
+func has_model() -> bool:
+	return model_scene != null
 
 
 func has_shield() -> bool:

@@ -112,14 +112,19 @@ func _bake_navigation() -> void:
 		source.add_projected_obstruction(outline, 0.0, box.size.y, false)
 
 	NavigationServer3D.bake_from_source_geometry_data(nav_mesh, source)
-	_nav_region.navigation_mesh = nav_mesh
 
-	# O bake deixa a malha um pouco acima do chão. Abaixa a região por esse desvio, para a
-	# malha ficar em y = 0 junto com os pés das unidades (as distâncias de chegada são em 3D).
+	# O bake deixa a malha um pouco acima do chão. Os vértices são abaixados por esse desvio,
+	# para a malha ficar em y = 0 junto com os pés das unidades (as distâncias de chegada são
+	# em 3D). Antes a região inteira era movida, mas o servidor de navegação nem sempre
+	# recebia a nova posição e os destinos ficavam 0,5 m acima do chão.
 	var lowest := INF
-	for v in nav_mesh.get_vertices():
+	var vertices := nav_mesh.get_vertices()
+	for v in vertices:
 		lowest = minf(lowest, v.y)
-	_nav_region.position.y = -lowest
+	for i in vertices.size():
+		vertices[i].y -= lowest
+	nav_mesh.set_vertices(vertices)
+	_nav_region.navigation_mesh = nav_mesh
 
 
 func _add_static_block(

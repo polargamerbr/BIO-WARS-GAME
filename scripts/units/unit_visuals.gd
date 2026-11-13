@@ -25,16 +25,27 @@ var _time := 0.0
 var _lunge := 0.0
 var _shield_panel: MeshInstance3D
 var _shield_mat: StandardMaterial3D
+var _overlay: StandardMaterial3D  ## Clarão de dano sobre o modelo 3D.
 var _phase := 0.0  ## Defasagem aleatória para as unidades não se moverem em sincronia.
 
 
 ## pivot: nó que contém as malhas do corpo. material: material do corpo (para o clarão).
+## Com modelo 3D, material é null: o modelo tem animações próprias (UnitModelAnimator) e o
+## clarão de dano usa um material sobreposto em todas as malhas.
 func setup(unit: Unit, pivot: Node3D, material: StandardMaterial3D) -> void:
 	_unit = unit
 	_pivot = pivot
 	_material = material
-	_material.emission_enabled = true
-	_material.emission = Color.BLACK
+	if _material != null:
+		_material.emission_enabled = true
+		_material.emission = Color.BLACK
+	else:
+		_overlay = StandardMaterial3D.new()
+		_overlay.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_overlay.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_overlay.albedo_color = Color(1.0, 1.0, 1.0, 0.0)
+		for mi in pivot.find_children("*", "MeshInstance3D", true, false):
+			mi.material_overlay = _overlay
 	_phase = randf() * TAU
 	unit.attack_performed.connect(_on_attack_performed)
 	unit.damaged.connect(_on_damaged)
@@ -51,6 +62,12 @@ func _process(delta: float) -> void:
 	var moving := speed > 0.3
 	var speed_ratio := clampf(speed / maxf(_unit.data.move_speed, 0.1), 0.0, 1.5)
 	var t := _time + _phase
+
+	if _unit.data.has_model():
+		_pivot.position = Vector3(0.0, 0.0, -_lunge)
+		if _shield_panel != null:
+			_update_shield_panel(t)
+		return
 
 	match _unit.data.body_shape:
 		UnitData.BodyShape.ROD:
@@ -157,6 +174,11 @@ func _on_attack_performed(_attacker: Unit, _target: Unit) -> void:
 
 
 func _on_damaged(_unit_hit: Unit, _amount: float) -> void:
+	if _overlay != null:
+		_overlay.albedo_color.a = 0.55
+		var fade := create_tween()
+		fade.tween_property(_overlay, "albedo_color:a", 0.0, FLASH_TIME)
+		return
 	_material.emission = Color.WHITE
 	_material.emission_energy_multiplier = FLASH_ENERGY
 	var tween := create_tween()

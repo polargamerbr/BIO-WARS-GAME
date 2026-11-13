@@ -1,5 +1,60 @@
 # CHANGELOG
 
+## [0.3.0] Primeiro modelo 3D: NEUTROPHIL (2026-11-12)
+
+### Adicionado
+- Modelo 3D do NEUTROPHIL, gerado no Tripo e recebido pela ponte (`TripoModels/futuristic_soldier_3d_model/`, FBX):
+  - 19.271 triângulos.
+  - Esqueleto Mixamo com 65 ossos.
+  - 5 animações: "wait", "walk", "run", "atirar com fuzil de assalto" e "fall".
+- Campos de modelo no `UnitData`:
+  - `model_scene`, `model_yaw_degrees` e `model_root_bone`;
+  - `anim_idle`, `anim_walk`, `anim_run`, `anim_attack` e `anim_death`.
+
+  Sem modelo, a unidade continua com o corpo provisório.
+- `scripts/units/unit_model_animator.gd`: toca a animação pelo estado da unidade:
+  - parada: `wait`;
+  - andando: `walk` ou `run`, conforme a velocidade;
+  - atacando parada: tiro;
+  - eliminada: `fall`.
+
+  As animações em repetição ganham loop, e o avanço do osso raiz é retirado, porque o deslocamento vem da navegação.
+- O modelo é ajustado sozinho à altura do corpo (1,8 m), com os pés no chão, e girado para a frente da unidade.
+- O clarão de dano aparece sobre o modelo com um material sobreposto. A morte com modelo toca a queda, espera 1,6 s, afunda no tecido e some.
+
+### Corrigido
+- **Navegação:** os destinos ficavam 0,5 m acima do chão. A região de navegação era movida para baixo, mas o servidor de navegação não recebia a nova posição. Com isso, as unidades nunca "chegavam" e ficavam andando no lugar no destino. Agora os vértices da malha são abaixados direto no bake.
+
+### Testado
+- Teste do modelo no jogo:
+  - 3 NEUTROPHILS com modelo, 1,8 m de altura e pés em y = 0;
+  - `wait` parados e `run` andando, com o quadril a 0,01 m da unidade (sem deriva);
+  - virados para onde andam;
+  - voltam a `wait` ao chegar;
+  - tiro atacando parados;
+  - `fall` ao morrer, e o corpo some depois.
+- Testes de missão, combate, estratégia e seleção (ver o resultado do commit).
+
+### Pendente
+- O fuzil ainda não está na mão: o tiro é feito de mãos vazias. Falta gerar o fuzil no Tripo e prender ao osso da mão.
+- O modelo continua em `TripoModels/` com o nome que veio do Tripo. Para mover ou renomear, use o painel FileSystem do editor do Godot, que atualiza as referências.
+
+
+## [0.2.2] Ponte do Tripo ativada (2026-11-11)
+
+### Alterado
+- Plugin Tripo Bridge movido de `Tripo3d_Godot_Bridge/` para `addons/tripo_bridge/` e ativado em `project.godot` (D016).
+- O executável deixa o plugin de fora (`addons/tripo_bridge/*`).
+- README e ART_PROMPTS explicam o fluxo Tripo Studio → ponte → `res://TripoModels/`.
+
+### Testado
+- Editor aberto em modo headless: o plugin carrega e o servidor da ponte escuta em `127.0.0.1:60650`.
+- O jogo continua abrindo sem erros.
+
+### Não testado
+- O envio de um modelo de verdade pelo Tripo Studio (depende da conta do usuário).
+
+
 ## [0.2.1] Artes de referência e chão texturizado (2026-11-11)
 
 ### Adicionado
